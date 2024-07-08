@@ -1,0 +1,221 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{9BC6D61A-5D4B-4D57-BC6B-5E3F9D04377E}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>GSynchExt</RootNamespace>
+    <AssemblyName>GSynchExt</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+    <WarningLevel>3</WarningLevel>
+    <FileVersion>24.104.0008</FileVersion>
+    <InformationalVersion>24.104.0008</InformationalVersion>
+    <Copyright>Copyright © 2005-2024 Acumatica, Inc. All rights reserved.</Copyright>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>portable</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="PX.Common">
+      <HintPath>..\..\..\..\GAIA24R1\Bin\PX.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="PX.Common.Std">
+      <HintPath>..\..\..\..\GAIA24R1\Bin\PX.Common.Std.dll</HintPath>
+    </Reference>
+    <Reference Include="PX.CS.Contracts">
+      <HintPath>..\..\..\..\GAIA24R1\Bin\PX.CS.Contracts.dll</HintPath>
+    </Reference>
+    <Reference Include="PX.Data">
+      <HintPath>..\..\..\..\GAIA24R1\Bin\PX.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="PX.Data.BQL.Fluent">
+      <HintPath>..\..\..\Resources\PX.Data.BQL.Fluent.dll</HintPath>
+    </Reference>
+    <Reference Include="PX.DbServices">
+      <HintPath>..\..\..\Resources\PX.DbServices.dll</HintPath>
+    </Reference>
+    <Reference Include="PX.Objects">
+      <HintPath>..\..\..\..\GAIA24R1\Bin\PX.Objects.DLL</HintPath>
+    </Reference>
+    <Reference Include="PX.Objects.FS">
+      <HintPath>..\..\..\Resources\PX.Objects.FS.dll</HintPath>
+    </Reference>
+    <Reference Include="PX.Objects.PJ">
+      <HintPath>..\..\..\..\GAIA24R1\Bin\PX.Objects.PJ.dll</HintPath>
+    </Reference>
+    <Reference Include="PX.Objects.PM.ChangeRequest">
+      <HintPath>..\..\..\..\GAIA24R1\Bin\PX.Objects.PM.ChangeRequest.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Approval\BOQApprovalSetupMaint.cs" />
+    <Compile Include="Approval\BOQEPApprovalMapMaintExt.cs" />
+    <Compile Include="Approval\BOQSetupApproval.cs" />
+    <Compile Include="Approval\FundTransferApproval.cs" />
+    <Compile Include="Approval\FundTransferApprovalSetupMaint.cs" />
+    <Compile Include="Approval\FundTransferEPApprovalMapMaintExt.cs" />
+    <Compile Include="Approval\FundTransferRequestSetup.cs" />
+    <Compile Include="Approval\FundTransferRequestSetupMaint.cs" />
+    <Compile Include="Approval\GSBOQSetup.cs" />
+    <Compile Include="Approval\GSBOQSetupMaint.cs" />
+    <Compile Include="Approval\PettyCashEPApprovalMapMaintExt.cs" />
+    <Compile Include="Approval\SiteApprovalSetupMaint.cs" />
+    <Compile Include="Approval\SiteEPApprovalMapMaintExtension.cs" />
+    <Compile Include="Approval\SiteSetup.cs" />
+    <Compile Include="Approval\SiteSetupApproval.cs" />
+    <Compile Include="Approval\SiteSetupMaint.cs" />
+    <Compile Include="BOQItemGroupMaint.cs" />
+    <Compile Include="ConvertItemsToEquipmentProcessGS.cs" />
+    <Compile Include="ConvertItemsToEquipmentProcessGSExt.cs" />
+    <Compile Include="DAC Extentions\APPaymentGSExt.cs" />
+    <Compile Include="DAC Extentions\ContractGSExt.cs" />
+    <Compile Include="DAC Extentions\PMBudgetGSExt.cs" />
+    <Compile Include="DAC Extentions\PMTaskGSExt.cs" />
+    <Compile Include="DAC Extentions\POOrderGSExt.cs" />
+    <Compile Include="DAC Extentions\RQRequestGSExt.cs" />
+    <Compile Include="DAC Extentions\RQRequestLineGSExt.cs" />
+    <Compile Include="DAC Extentions\RQRequisitionGSExt.cs" />
+    <Compile Include="DAC Extentions\RQRequisitionLineBiddingGSExt.cs" />
+    <Compile Include="DACs\BankStatementInvoices.cs" />
+    <Compile Include="DACs\BOQGroup.cs" />
+    <Compile Include="DACs\BOQGroupItems.cs" />
+    <Compile Include="DACs\CEBLocations.cs" />
+    <Compile Include="DACs\Cluster.cs" />
+    <Compile Include="DACs\Districts.cs" />
+    <Compile Include="DACs\FundTransferRequest.cs" />
+    <Compile Include="DACs\GroupTypes.cs" />
+    <Compile Include="DACs\GSBOQ.cs" />
+    <Compile Include="DACs\GSBOQMatl.cs" />
+    <Compile Include="DACs\GSBOQRev.cs" />
+    <Compile Include="DACs\INTranGSExt.cs" />
+    <Compile Include="DACs\LECOLocations.cs" />
+    <Compile Include="DACs\MaterialTransferRequest.cs" />
+    <Compile Include="DACs\MTRequestDetails.cs" />
+    <Compile Include="DACs\Phase.cs" />
+    <Compile Include="DACs\ProjectStock.cs" />
+    <Compile Include="DACs\Provinces.cs" />
+    <Compile Include="DACs\RequestedProjectMaterials.cs" />
+    <Compile Include="DACs\RRRates.cs" />
+    <Compile Include="DACs\RRSetup.cs" />
+    <Compile Include="DACs\ServiceMaterialRequest.cs" />
+    <Compile Include="DACs\ServiceMaterialRequestDetails.cs" />
+    <Compile Include="DACs\SiteType.cs" />
+    <Compile Include="DACs\SMRSiteStatusFilter.cs" />
+    <Compile Include="DACs\SMRSiteStatusSelected.cs" />
+    <Compile Include="DACs\SolarRevGen.cs" />
+    <Compile Include="DACs\SolarRevGenDetails.cs" />
+    <Compile Include="DACs\SolarSite.cs" />
+    <Compile Include="DACs\SolarSiteInverterData.cs" />
+    <Compile Include="DACs\SolarSiteRevGen.cs" />
+    <Compile Include="DACs\SolarSiteSurvey.cs" />
+    <Compile Include="DACs\SolarSiteSurveyBuildings.cs" />
+    <Compile Include="DACs\UploadBankStatement.cs" />
+    <Compile Include="Descriptor\ActiveProjectTaskGSAttribute.cs" />
+    <Compile Include="Descriptor\BOQIDAttribute.cs" />
+    <Compile Include="Descriptor\BOQRevAttribute.cs" />
+    <Compile Include="Descriptor\Constants.cs" />
+    <Compile Include="Descriptor\FSSelectorEquipmentGSAttribute2.cs" />
+    <Compile Include="Descriptor\GSBOQCapacityAttribute.cs" />
+    <Compile Include="Descriptor\GSProjectHelper.cs" />
+    <Compile Include="Descriptor\LatestCEBOfficeDefaultAttribute.cs" />
+    <Compile Include="Descriptor\Messages.cs" />
+    <Compile Include="Descriptor\MessagesBOQ.cs" />
+    <Compile Include="Descriptor\RevisionIDAttribute.cs" />
+    <Compile Include="Descriptor\SiteRawAttribute.cs" />
+    <Compile Include="Descriptor\SSSurveyListAttributes.cs" />
+    <Compile Include="DistrictEntry.cs" />
+    <Compile Include="Examples.cs" />
+    <Compile Include="FundTransferRequestEntry.cs" />
+    <Compile Include="GAIADBTaskProgressTracker.cs" />
+    <Compile Include="Graph Extensions\APInvoiceEntryGSExt.cs" />
+    <Compile Include="Graph Extensions\AppointmentEntryGSExt.cs" />
+    <Compile Include="Graph Extensions\APQuickCheckEntryGSExt.cs" />
+    <Compile Include="Graph Extensions\ARInvoiceEntryGSExt.cs" />
+    <Compile Include="Graph Extensions\CashTransferEntryGSExt.cs" />
+    <Compile Include="Graph Extensions\ChangeOrderEntryGSExt.cs" />
+    <Compile Include="Graph Extensions\ChangeRequestEntryGSExt.cs" />
+    <Compile Include="Graph Extensions\DailyFieldReportEntryProgressWorksheetGSExt.cs" />
+    <Compile Include="Graph Extensions\INIssueEntryGSExt.cs" />
+    <Compile Include="Graph Extensions\INTransferEntryGSExt.cs" />
+    <Compile Include="Graph Extensions\PettyCashPayment.cs" />
+    <Compile Include="Graph Extensions\PMChangeRequestGSExt.cs" />
+    <Compile Include="Graph Extensions\POOrderEntryGSExt.cs" />
+    <Compile Include="Graph Extensions\POReceiptEntryGSExt.cs" />
+    <Compile Include="Graph Extensions\ProgressWorksheetEntryGSExt.cs" />
+    <Compile Include="Graph Extensions\ProjectBalanceMaintGSExt.cs" />
+    <Compile Include="Graph Extensions\ProjectEntryGSExt .cs" />
+    <Compile Include="Graph Extensions\ProjectTaskEntryGSExt.cs" />
+    <Compile Include="Graph Extensions\RQBiddingEntryGSExt.cs" />
+    <Compile Include="Graph Extensions\RQRequestEntryGSExt.cs" />
+    <Compile Include="Graph Extensions\RQRequisitionEntryGSExt.cs" />
+    <Compile Include="Graph Extensions\ServiceOrderEntryGSExt.cs" />
+    <Compile Include="Graph Extensions\SMEquipmentMaintGSExt.cs" />
+    <Compile Include="Graph Extensions\SubmittalEntryGSExt.cs" />
+    <Compile Include="Graph Extensions\TemplateMaintGSExt.cs" />
+    <Compile Include="Graph Extensions\TemplateTaskMaintGSExt.cs" />
+    <Compile Include="GSBOQMaint.cs" />
+    <Compile Include="GSBOQMaintRev.cs" />
+    <Compile Include="LatestCompletedSurveys.cs" />
+    <Compile Include="MaterialTransferRequestEntry.cs" />
+    <Compile Include="ProjIssuedEQInventoryItem.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Reports\ARTranPostGLSiteRep.cs" />
+    <Compile Include="RequestedProjectMaterialsEntry.cs" />
+    <Compile Include="ServiceMaterialRequestEntry.cs" />
+    <Compile Include="SiteTypeMaint.cs" />
+    <Compile Include="SolarRevGenEntry.cs" />
+    <Compile Include="SolarSiteEntry.cs" />
+    <Compile Include="SolarSiteInverterDataMaint.cs" />
+    <Compile Include="SSSurveyAttributeGroupMaint.cs" />
+    <Compile Include="UploadBankStatementMaint.cs" />
+    <Compile Include="WorkFlows\BOQWorkFlow.cs" />
+    <Compile Include="WorkFlows\FundTransferRequestEntry_ApprovalWorkflow.cs" />
+    <Compile Include="WorkFlows\FundTransferRequestWorkflow.cs" />
+    <Compile Include="WorkFlows\GSBOQMaint_ApprovalWorkFlow.cs" />
+    <Compile Include="WorkFlows\MaterialTransferRequestWorkflow.cs" />
+    <Compile Include="WorkFlows\ServiceMaterialRequestWorkFlow.cs" />
+    <Compile Include="WorkFlows\SolarSalesEntry_Workflow.cs" />
+    <Compile Include="WorkFlows\SolarSiteSurveyMaint.cs" />
+    <Compile Include="WorkFlows\SolarSiteSurveyMaint_ApprovalWorkFlow.cs" />
+    <Compile Include="WorkFlows\SolarSiteSurveyMaint_WorkFlow.cs" />
+    <Compile Include="WorkFlows\SolarSite_Workflow.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces">
+      <Version>8.0.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe">
+      <Version>6.0.0</Version>
+    </PackageReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
