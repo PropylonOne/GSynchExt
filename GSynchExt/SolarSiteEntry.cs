@@ -896,6 +896,7 @@ namespace GSynchExt
         protected virtual void CreateProject(SolarSite row)
         {
             if (row == null) return;
+            // Acuminator disable once PX1008 LongOperationDelegateSynchronousExecution [Justification]
             PXLongOperation.StartOperation(this, delegate ()
             {
                 var projRec = PMProject.UK.Find(this, CTPRType.Project, row.SolarSiteCD);
@@ -922,15 +923,26 @@ namespace GSynchExt
                     proj.RateTypeID = info?.CuryRateTypeID;
                     if (!DimensionMaint.IsAutonumbered(this, ProjectAttribute.DimensionName))
                         proj.ContractCD = row.SolarSiteCD;
-                    proj.Description = row.SiteName + " " + row.Province + " " + row.PhaseID;
-                    proj.StartDate = row.ProjPlannedStartDate;
+            
+
+                    proj = prjEntryGraph.Project.Insert(proj);
+                    
+                    /// Update subaccount
+                    proj.DefaultSalesSubID = sub?.SubID;
+                    proj.DefaultAccrualSubID = sub?.SubID;
+                    proj.DefaultExpenseSubID = sub?.SubID;
+                    proj.Status = ProjectStatus.Planned;
+                    proj.LockCommitments = true;
+                    proj.IsCancelled = true;
+                    proj = prjEntryGraph.Project.Update(proj);
+                    proj.TemplateID = row.TemplateID;
+                    prjEntryGraph.DefaultFromTemplate(proj, row.TemplateID, PX.Objects.PM.ProjectEntry.DefaultFromTemplateSettings.Default);
 
 
                     proj.OwnerID = row.ProjectManager;
                     proj.Description = row.SiteName + " " + row.Province + " " + row.PhaseID;
                     proj.StartDate = row.ProjPlannedStartDate;
 
-                    proj = prjEntryGraph.Project.Insert(proj);
                     EPEmployee contact = PXSelect<EPEmployee, Where<EPEmployee.ownerID,
                                                 Equal<Required<EPEmployee.ownerID>>>>.Select(this, row?.ProjectManager);
 
@@ -943,43 +955,9 @@ namespace GSynchExt
                     proj.DefaultSalesSubID = sub?.SubID;
                     proj.DefaultAccrualSubID = sub?.SubID;
                     proj.DefaultExpenseSubID = sub?.SubID;
-                    proj.Status = ProjectStatus.Planned;
-                    proj.LockCommitments = true;
-                    proj.IsCancelled = true;
-                    proj = prjEntryGraph.Project.Update(proj);
-                    proj.TemplateID = row.TemplateID;
-
-                    //prjEntryGraph.Project.Cache.SetValue<PMProject.templateID>(proj, row.TemplateID);
-
-
-                    //   proj.TemplateID = row.TemplateID;
-                    //prjEntryGraph.DefaultFromTemplate(proj, proj.TemplateID, new ProjectEntry.DefaultFromTemplateSettings() { CopyProperties = true, CopyAttributes = true, CopyEmployees = true, CopyEquipment = true, CopyNotification = true, CopyCurrency = false, CopyNotes = true, CopyFiles = true });
-
-
-
-                    /// Explicitly populate from Template
-
-                    /*
-                    Dictionary<string, int> taskMap = new Dictionary<string, int>();
-                    AddingTasksToProject(row, prjEntryGraph, taskMap, false, false);
-
-
-
-                    */
-                    //      proj.RateTableID = "STANDARD";
-                    //       proj = prjEntryGraph.Project.Insert(proj);
-
-
-                    prjEntryGraph.DefaultFromTemplate(proj, row.TemplateID, PX.Objects.PM.ProjectEntry.DefaultFromTemplateSettings.Default);
-
-
                     var projExt = proj.GetExtension<ContractGSExt>();
                     projExt.UsrAreaEngineer = row.AreaEngineer;
-                    //prjEntryGraph.Project.Update(proj);
-                    //  prjEntryGraph.ProjectProperties.Update(proj);
-
                     prjEntryGraph.Project.Update(proj);
-
                     prjEntryGraph.Actions.PressSave();
                     row.ProjectID = proj.ContractID;
                     this.Site.Update(row);

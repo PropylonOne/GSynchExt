@@ -585,9 +585,8 @@ namespace PX.Objects.PM
         }
 
         #endregion
+
         #region New Methods
-
-
         protected virtual void ValidateTaskStatusUpdate(PMProject proj, PMTask task, string newStatus, string oldStatus, out bool validateOK)
         {
             validateOK = true;

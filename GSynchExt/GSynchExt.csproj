@@ -33,6 +33,12 @@
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Accord.Math">
+      <HintPath>..\..\Resources\Accord.Math.dll</HintPath>
+    </Reference>
+    <Reference Include="Accord.Statistics">
+      <HintPath>..\..\Resources\Accord.Statistics.dll</HintPath>
+    </Reference>
     <Reference Include="PX.Common">
       <HintPath>..\..\..\..\GAIA24R1\Bin\PX.Common.dll</HintPath>
     </Reference>
@@ -46,16 +52,16 @@
       <HintPath>..\..\..\..\GAIA24R1\Bin\PX.Data.dll</HintPath>
     </Reference>
     <Reference Include="PX.Data.BQL.Fluent">
-      <HintPath>..\..\..\Resources\PX.Data.BQL.Fluent.dll</HintPath>
+      <HintPath>..\..\Resources\PX.Data.BQL.Fluent.dll</HintPath>
     </Reference>
     <Reference Include="PX.DbServices">
-      <HintPath>..\..\..\Resources\PX.DbServices.dll</HintPath>
+      <HintPath>..\..\Resources\PX.DbServices.dll</HintPath>
     </Reference>
     <Reference Include="PX.Objects">
       <HintPath>..\..\..\..\GAIA24R1\Bin\PX.Objects.DLL</HintPath>
     </Reference>
     <Reference Include="PX.Objects.FS">
-      <HintPath>..\..\..\Resources\PX.Objects.FS.dll</HintPath>
+      <HintPath>..\..\Resources\PX.Objects.FS.dll</HintPath>
     </Reference>
     <Reference Include="PX.Objects.PJ">
       <HintPath>..\..\..\..\GAIA24R1\Bin\PX.Objects.PJ.dll</HintPath>
