@@ -120,6 +120,7 @@
     <Compile Include="DACs\MaterialTransferRequest.cs" />
     <Compile Include="DACs\MTRequestDetails.cs" />
     <Compile Include="DACs\Phase.cs" />
+    <Compile Include="DACs\ProjectStock2.cs" />
     <Compile Include="DACs\ProjectStock.cs" />
     <Compile Include="DACs\Provinces.cs" />
     <Compile Include="DACs\RequestedProjectMaterials.cs" />

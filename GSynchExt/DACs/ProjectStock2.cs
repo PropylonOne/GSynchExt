@@ -11,8 +11,8 @@ using PX.Objects.PM;
 namespace PX.Objects
 {
     [Serializable]
-    [PXCacheName("Project Stock")]
-    public class ProjectStock : PXBqlTable, IBqlTable
+    [PXCacheName("Project Stock2")]
+    public class ProjectStock2 : PXBqlTable, IBqlTable
     {
 
         public class UK : PrimaryKeyOf<ProjectStock>.By<projectID>
@@ -155,8 +155,8 @@ namespace PX.Objects
 
     }
 
-    [PXCacheName("Project Stock Filter")]
-    public partial class ProjectStockFilter : PXBqlTable, IBqlTable
+    [PXCacheName("Project Stock Filter2")]
+    public partial class ProjectStockFilter2 : PXBqlTable, IBqlTable
     {
         #region ContractID
         [PXDBInt()]

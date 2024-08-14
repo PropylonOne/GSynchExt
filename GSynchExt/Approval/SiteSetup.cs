@@ -195,14 +195,21 @@ namespace GSynchExt
         public abstract class dfltSiteID : PX.Data.BQL.BqlInt.Field<dfltSiteID> { }
 		[Site(DisplayName = "Default Warehouse", DescriptionField = typeof(INSite.descr))]
 		public virtual int? DfltSiteID { get; set; }
-		#endregion
+        #endregion
 
-		#region TemplateID
-		public abstract class templateID : PX.Data.BQL.BqlInt.Field<templateID> { }
-        [PXUIField(DisplayName ="Template ID")]
-		[PXSelector(typeof(Search<PMProject.contractID>), SubstituteKey =(typeof(PMProject.contractCD)))]
-		public virtual int? TemplateID { get; set; }
-		#endregion
+        #region IssueReasonCodePrefix 
+        public abstract class issueReasonCodePrefix : PX.Data.BQL.BqlString.Field<issueReasonCodePrefix> { }
 
-	}
+        [PXDBString(IsUnicode = true, InputMask = "")]
+        [PXUIField(DisplayName = "Issue Reason Code Prefix")]
+        public virtual String IssueReasonCodePrefix
+        {
+            get;
+            set;
+        }
+        #endregion
+
+
+
+    }
 }

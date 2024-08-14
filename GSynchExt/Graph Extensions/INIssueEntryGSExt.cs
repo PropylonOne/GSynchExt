@@ -21,7 +21,9 @@ namespace PX.Objects.IN
 {
     public class INIssueEntryGSExt : PXGraphExtension<INIssueEntry>
     {
-
+        #region IsActive
+        public static bool IsActive() { return PXAccess.FeatureInstalled<FeaturesSet.projectModule>(); }
+        #endregion
 
         public PXFilter<ProjectStockFilter> projectstockitemsfilter;
 
@@ -42,7 +44,7 @@ namespace PX.Objects.IN
                     GroupBy<ProjectStock.taskID,
                     GroupBy<ProjectStock.lotSerialNbr,
                     GroupBy<ProjectStock.siteID,
-                    GroupBy<ProjectStock.locationID, 
+                    GroupBy<ProjectStock.locationID,
                     Sum<ProjectStock.totalAvailableQty>>>>>>>>>>(this.Base);
             PXDelegateResult delResult = new PXDelegateResult();
             delResult.Capacity = 202;
@@ -126,7 +128,7 @@ namespace PX.Objects.IN
                 foreach (ProjectStock line in ProjectStockItems.Cache.Cached)
                 {
 
-                    if (line.Selected== true && line.QtySelected > 0)
+                    if (line.Selected == true && line.QtySelected > 0)
                     {
                         INTran newline = PXCache<INTran>.CreateCopy(this.Base.transactions.Insert(new INTran()));
                         newline = InitTran(newline, line);
@@ -158,7 +160,7 @@ namespace PX.Objects.IN
                         // this.Base.Caches[typeof(INTran)].Update(newline);
 
                         //newline = (INTran)this.Base.transactions.Cache.Update(newline); 
-                    }*/ 
+                    }*/
                 }
             }
 
@@ -166,7 +168,7 @@ namespace PX.Objects.IN
         }
 
 
-        protected  INTran InitTran(INTran newTran, ProjectStock siteStatus)
+        protected INTran InitTran(INTran newTran, ProjectStock siteStatus)
         {
             newTran.SiteID = siteStatus.SiteID ?? newTran.SiteID;
             newTran.InventoryID = siteStatus.InventoryID;
@@ -350,6 +352,36 @@ namespace PX.Objects.IN
                 throw new PXException(ex.Message);
             }
         }
+
+        protected virtual void _(Events.FieldUpdated<INTran, INTran.projectID> e)
+        {
+            INTran doc = (INTran)e.Row;
+            if (doc == null) return;
+
+            SiteSetup sitePref = PXSelect<SiteSetup>.Select(this.Base);
+            if (sitePref == null) return;
+
+            PMProject proj = PMProject.PK.Find(this.Base, doc.ProjectID);
+            if(proj.NonProject == false)
+            {
+                INSite site = INSite.PK.Find(Base, doc.SiteID);
+                var sitePrefix = site.SiteCD.Substring(0, 3);
+                if (site != null)
+                {
+                    var code = (sitePref.IssueReasonCodePrefix + "" + sitePrefix).ToUpper();
+                    if (code != null)
+                    {
+                        ReasonCode reasonCode  = ReasonCode.PK.Find(Base, code);
+                        if (reasonCode != null)
+                        {
+                            doc.ReasonCode = reasonCode.ReasonCodeID;
+                        }
+                    }
+                }
+            }
+        }
+
         #endregion
+
     }
 }

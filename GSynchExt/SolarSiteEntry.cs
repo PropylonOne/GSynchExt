@@ -938,11 +938,6 @@ namespace GSynchExt
                     proj.TemplateID = row.TemplateID;
                     prjEntryGraph.DefaultFromTemplate(proj, row.TemplateID, PX.Objects.PM.ProjectEntry.DefaultFromTemplateSettings.Default);
 
-
-                    proj.OwnerID = row.ProjectManager;
-                    proj.Description = row.SiteName + " " + row.Province + " " + row.PhaseID;
-                    proj.StartDate = row.ProjPlannedStartDate;
-
                     EPEmployee contact = PXSelect<EPEmployee, Where<EPEmployee.ownerID,
                                                 Equal<Required<EPEmployee.ownerID>>>>.Select(this, row?.ProjectManager);
 
@@ -955,6 +950,10 @@ namespace GSynchExt
                     proj.DefaultSalesSubID = sub?.SubID;
                     proj.DefaultAccrualSubID = sub?.SubID;
                     proj.DefaultExpenseSubID = sub?.SubID;
+                    proj.OwnerID = row.ProjectManager;
+                    proj.Description = row.SiteName + " " + row.Province + " " + row.PhaseID;
+                    proj.StartDate = row.ProjPlannedStartDate;
+
                     var projExt = proj.GetExtension<ContractGSExt>();
                     projExt.UsrAreaEngineer = row.AreaEngineer;
                     prjEntryGraph.Project.Update(proj);
