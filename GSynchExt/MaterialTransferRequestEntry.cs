@@ -1,34 +1,13 @@
 ﻿using PX.Data;
-using PX.Data.BQL;
 using PX.Data.BQL.Fluent;
-using PX.Data.Update.ExchangeService;
-using PX.Objects.AP;
-using PX.Objects.AR;
 using PX.Objects.CS;
 using PX.Objects.EP;
-using PX.Objects.FA;
-using PX.Objects.GL;
 using PX.Objects.IN;
-using PX.Objects.PJ.Submittals.PJ.DAC;
-using PX.Objects.PJ.Submittals.PJ.Graphs;
 using PX.Objects.PM;
-using PX.Objects.PO;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static GSynchExt.GSBOQMaint;
-using static PX.Data.BQL.BqlPlaceholder;
-using static PX.Objects.AP.APDocumentEnq;
-using static PX.Objects.CA.CABankTran.FK;
-using static PX.Objects.FA.FABookSettings.midMonthType;
-using static PX.Objects.IN.InventoryTranSumEnqFilter;
-using static PX.Objects.PM.GSProjectHelper;
-using static PX.Objects.ProjectStock;
-using static PX.Objects.RQ.RQRequisitionContent.FK;
-using static PX.Objects.TX.CSTaxCalcType;
 using BudgetKeyTuple = PX.Objects.CS.BudgetKeyTuple;
 /// <summary>
 /// This graph allows you to create a material request against a project's cost Budget
@@ -45,8 +24,6 @@ namespace GSynchExt
         public PXSelect<MTRequestDetails, Where<MTRequestDetails.reqNbr,
           Equal<Current<MaterialTransferRequest.reqNbr>>,
           And<MTRequestDetails.selected, Equal<True>>>> MatlRequestSelectedDet;
-
-
         [PXHidden]
         public PXSelect<MTRequestDetails,
                 Where<MTRequestDetails.reqNbr, Equal<Current<MTRequestDetails.reqNbr>>,
@@ -99,19 +76,19 @@ namespace GSynchExt
                     if (releasedIssue != null)
                     {
                         row.IssueQtyUnReleased = row.IssueQtyReleased - releasedIssue?.Qty;
-                        row.IssueQtyReleased = releasedIssue?.Qty;
+                        row.IssueQtyReleased   = releasedIssue?.Qty;
 
                     }
                     else
                     {
                         row.IssueQtyUnReleased = row.IssueQty;
-                        row.IssueQtyReleased = 0;
+                        row.IssueQtyReleased   = 0;
                     }
                 }
                 else
                 {
                     row.IssueQtyUnReleased = 0;
-                    row.IssueQtyReleased = 0;
+                    row.IssueQtyReleased   = 0;
                 }
 
                 if (row.TransferQty > 0)
@@ -132,31 +109,23 @@ namespace GSynchExt
                     if(releasedTransfer != null)
                     {
                         row.TransferQtyUnReleased = row.TransferQty - releasedTransfer?.Qty;
-                        row.TransferQtyReleased = releasedTransfer?.Qty;
+                        row.TransferQtyReleased   = releasedTransfer?.Qty;
 
                     }
                     else
                     {
                         row.TransferQtyUnReleased = row.TransferQty;
-                        row.TransferQtyReleased = 0;
+                        row.TransferQtyReleased   = 0;
                     }
                 }
                 else
                 {
                     row.TransferQtyUnReleased = 0;
-                    row.TransferQtyReleased = 0;
+                    row.TransferQtyReleased   = 0;
                 }
             }
             return result;
         }
-
-        #region Constructor
-        public MaterialTransferRequestEntry()
-        {
-            //       FundTransferRequestSetup setup = AutoNumSetup.Current;
-
-        }
-        #endregion
 
         #region Events
         protected virtual void _(Events.RowSelected<MaterialTransferRequest> e)
@@ -168,16 +137,16 @@ namespace GSynchExt
             if (totalsRec != null)
             {
                 doc.TransferQty = totalsRec.TransferQty;
-                doc.IssueQty = totalsRec.IssueQty;
-                doc.RequestQty = totalsRec.RequestedQty;
+                doc.IssueQty    = totalsRec.IssueQty;
+                doc.RequestQty  = totalsRec.RequestedQty;
             }
 
-            bool isReleased = doc.Status == GSynchExt.FTRStatus.Released && doc.ReqNbr != null;
-            bool haslines = MatlRequestDet.Select().Count() > 0;
-            bool isOnHold = doc.Status == GSynchExt.FTRStatus.OnHold;
-            bool isClosed = doc.Status == GSynchExt.FTRStatus.Closed;
-            e.Cache.AllowDelete = isOnHold;
-
+            bool isReleased                       = doc.Status == GSynchExt.FTRStatus.Released && doc.ReqNbr != null;
+            bool haslines                         = MatlRequestDet.Select().Count() > 0;
+            bool isOnHold                         = doc.Status == GSynchExt.FTRStatus.OnHold;
+            bool isClosed                         = doc.Status == GSynchExt.FTRStatus.Closed;
+           
+            e.Cache.AllowDelete                   = isOnHold;
             this.MatlRequestDet.Cache.AllowInsert = isOnHold;
             this.MatlRequestDet.Cache.AllowUpdate = isOnHold;
             this.MatlRequestDet.Cache.AllowDelete = isOnHold;
@@ -201,7 +170,6 @@ namespace GSynchExt
             PXUIFieldAttribute.SetEnabled<MaterialTransferRequest.projectID>(e.Cache, doc, !haslines && isOnHold);
             PXUIFieldAttribute.SetEnabled<MaterialTransferRequest.fromSiteID>(e.Cache, doc, isOnHold);
             PXUIFieldAttribute.SetEnabled<MaterialTransferRequest.toSiteID>(e.Cache, doc, isOnHold);
-
             PXUIFieldAttribute.SetRequired<MaterialTransferRequest.notify>(e.Cache, true);
             PXUIFieldAttribute.SetRequired<MaterialTransferRequest.fromSiteID>(e.Cache, true);
             PXUIFieldAttribute.SetRequired<MaterialTransferRequest.reqBy>(e.Cache, true);
@@ -217,12 +185,11 @@ namespace GSynchExt
 
             MaterialTransferRequest req = MaterialTransferRequest.UK.Find(this, doc.ReqNbr);
 
-            bool isReleased = req.Status == GSynchExt.FTRStatus.Released && doc.ReqNbr != null;
-            bool haslines = MatlRequestDet.Select().Count() > 0;
-            bool isOnHold = req.Status == GSynchExt.FTRStatus.OnHold;
-            bool isClosed = req.Status == GSynchExt.FTRStatus.Closed;
-            e.Cache.AllowDelete = isOnHold;
-
+            bool isReleased                       = req.Status == GSynchExt.FTRStatus.Released && doc.ReqNbr != null;
+            bool haslines                         = MatlRequestDet.Select().Count() > 0;
+            bool isOnHold                         = req.Status == GSynchExt.FTRStatus.OnHold;
+            bool isClosed                         = req.Status == GSynchExt.FTRStatus.Closed;
+            e.Cache.AllowDelete                   = isOnHold;
             this.MatlRequestDet.Cache.AllowInsert = isOnHold;
             this.MatlRequestDet.Cache.AllowUpdate = isOnHold;
             this.MatlRequestDet.Cache.AllowDelete = isOnHold;
@@ -250,24 +217,6 @@ namespace GSynchExt
             e.Cache.SetValueExt<MaterialTransferRequest.reqBy>(e.Row, emp?.BAccountID);
         }
 
-        /*
-         * TO DO
-        protected virtual void _(Events.FieldVerifying<MaterialTransferRequest, MaterialTransferRequest.projectID> e)
-        {
-            MaterialTransferRequest row = e.Row as MaterialTransferRequest;
-            if (row == null) return;
-
-            PMProject proj = PMProject.PK.Find(this, row.ProjectID);
-            if (proj == null) return;
-
-            if(proj.BudgetFinalized != true)
-            {
-                throw new PXException(GSynchExt.Messages.BudgetNotLocked);
-            }
-
-        }
-        */
-
         #endregion
 
 
@@ -284,36 +233,34 @@ namespace GSynchExt
             /// Update the Requested Qty in the interim table
 
             RequestedProjectMaterialsEntry ReqPMGraph = CreateInstance<RequestedProjectMaterialsEntry>();
-            ProjectEntry ProjEntry = CreateInstance<ProjectEntry>();
+            ProjectEntry ProjEntry                    = CreateInstance<ProjectEntry>();
 
             var details = this.MatlRequestDet.Select();
-             details = this.MatlRequestDet.Select();
 
             foreach (MTRequestDetails requestlines in details)
             {
                 var interimMatRecord = RequestedProjectMaterials.PK.Find(this, requestlines.ProjectID, requestlines.TaskID, requestlines.AccountGroupID,
-                                                   requestlines.CostCode, requestlines.InventoryID);
-                var budget = PMCostBudget.PK.Find(ProjEntry, requestlines.ProjectID, requestlines.TaskID, requestlines.AccountGroupID,
-                                   requestlines.CostCode, requestlines.InventoryID);
+                                                                         requestlines.CostCode, requestlines.InventoryID);
+                var budget           = PMCostBudget.PK.Find(ProjEntry, requestlines.ProjectID, requestlines.TaskID, requestlines.AccountGroupID,
+                                                            requestlines.CostCode, requestlines.InventoryID);
 
                 decimal? totRequestQty = 0;
-                decimal? totTranQty = Decimal.Zero;
-                decimal? totIssueQty = Decimal.Zero;
+                decimal? totTranQty    = Decimal.Zero;
+                decimal? totIssueQty   = Decimal.Zero;
 
                 GetLatestRequestQtyPerBudgetItem(budget, requestlines, out totRequestQty);
-                //GetTranIssueQtyPerRequest(this, this.MatlRequest.Current, out totTranQty, out totIssueQty);
                 GetTranIssueQtyPerRequest(this, requestlines, out totTranQty, out totIssueQty);
 
 
-                requestlines.TransferQty = totTranQty;
-                requestlines.IssueQty = totIssueQty;
-                requestlines.RevisedQty = budget.RevisedQty;
+                requestlines.TransferQty          = totTranQty;
+                requestlines.IssueQty             = totIssueQty;
+                requestlines.RevisedQty           = budget.RevisedQty;
 
 
                 if (interimMatRecord != null)
                 {
                     interimMatRecord.RequestedQty = totRequestQty;
-                    requestlines.RequestedQty = budget.RevisedQty - interimMatRecord.RequestedQty;
+                    requestlines.RequestedQty     = budget.RevisedQty - interimMatRecord.RequestedQty;
                     ReqProjectMaterials.Update(interimMatRecord);
                 }
 
@@ -334,15 +281,15 @@ namespace GSynchExt
         {
 
             MaterialTransferRequest row = MatlRequest.Current;
-            PXCache cache = MatlRequest.Cache;
+            PXCache cache               = MatlRequest.Cache;
             PXGraph graph = cache.Graph;
-
             if (row == null) return adapter.Get();
-            bool hasLines = false;
+            bool hasLines          = false;
             decimal? newRequestQty = 0;
 
             HashSet<BudgetKeyTuple> existing = GetExistingCostBudgets();
 
+            // Acuminator disable once PX1008 LongOperationDelegateSynchronousExecution [Justification]
             PXLongOperation.StartOperation(this, delegate ()
             {
 
@@ -375,18 +322,18 @@ namespace GSynchExt
                     if (!existing.Contains(BudgetKeyTuple.Create(item)) && newRequestQty > 0)
                     {
                         MTRequestDetails matDetLine = new MTRequestDetails();
-                        matDetLine.InventoryID = budgetLine.InventoryID;
-                        matDetLine.UoM = budgetLine.UOM;
-                        matDetLine.CostCode = budgetLine.CostCodeID;
-                        matDetLine.ProjectID = budgetLine.ProjectID;
-                        matDetLine.TaskID = budgetLine.TaskID;
-                        matDetLine.AccountGroupID = budgetLine.AccountGroupID;
-                        matDetLine.UoM = budgetLine.UOM;
-                        matDetLine.ActualQty = budgetLine.ActualQty;
-                        matDetLine.RevisedQty = budgetLine.RevisedQty;
-                        matDetLine.RequestedQty = newRequestQty;
-                        matDetLine.IssueQty = decimal.Zero;
-                        matDetLine.TransferQty = decimal.Zero;
+                        matDetLine.InventoryID      = budgetLine.InventoryID;
+                        matDetLine.UoM              = budgetLine.UOM;
+                        matDetLine.CostCode         = budgetLine.CostCodeID;
+                        matDetLine.ProjectID        = budgetLine.ProjectID;
+                        matDetLine.TaskID           = budgetLine.TaskID;
+                        matDetLine.AccountGroupID   = budgetLine.AccountGroupID;
+                        matDetLine.UoM              = budgetLine.UOM;
+                        matDetLine.ActualQty        = budgetLine.ActualQty;
+                        matDetLine.RevisedQty       = budgetLine.RevisedQty;
+                        matDetLine.RequestedQty     = newRequestQty;
+                        matDetLine.IssueQty         = decimal.Zero;
+                        matDetLine.TransferQty      = decimal.Zero;
 
 
                         this.MatlRequestDet.Insert(matDetLine);
@@ -395,7 +342,7 @@ namespace GSynchExt
                 }
                 if (!hasLines)
                 {
-                    throw new PXSetPropertyException(Messages.WarnNoBalanceQty, PXErrorLevel.RowWarning);
+                    throw new PXSetPropertyException(row, Messages.WarnNoBalanceQty, PXErrorLevel.RowWarning);
 
                 }
                 this.Actions.PressSave();
@@ -485,8 +432,7 @@ namespace GSynchExt
 
         public PXAction<MaterialTransferRequest> RemoveHold;
         [PXButton(), PXUIField(DisplayName = "Remove Hold",
-        MapEnableRights = PXCacheRights.Select,
-        MapViewRights = PXCacheRights.Select)]
+        MapEnableRights = PXCacheRights.Select,MapViewRights = PXCacheRights.Select)]
         protected virtual IEnumerable removeHold(PXAdapter adapter)
         {
             /// Update the interim table at the time of Release
@@ -507,12 +453,12 @@ namespace GSynchExt
                     if (interimMatRecord == null) /// No matching records in the intermediate table
                     {
                         RequestedProjectMaterials rec = new RequestedProjectMaterials();
-                        rec.ProjectID = budget.ProjectID;
-                        rec.TaskID = budget.TaskID;
-                        rec.AccountGroupID = budget.AccountGroupID;
-                        rec.CostCode = budget.CostCodeID;
-                        rec.InventoryID = budget.InventoryID;
-                        rec.RequestedQty = requestlines.RequestedQty ?? 0;
+                        rec.ProjectID                 = budget.ProjectID;
+                        rec.TaskID                    = budget.TaskID;
+                        rec.AccountGroupID            = budget.AccountGroupID;
+                        rec.CostCode                  = budget.CostCodeID;
+                        rec.InventoryID               = budget.InventoryID;
+                        rec.RequestedQty              = requestlines.RequestedQty ?? 0;
                         ReqPMGraph.ReqProjectMaterials.Insert(rec);
                     }
                     else /// Matching record exists in the intermediate table then update interim table
@@ -551,8 +497,7 @@ namespace GSynchExt
 
         public PXAction<MaterialTransferRequest> Hold2;
         [PXButton(), PXUIField(DisplayName = "Hold",
-        MapEnableRights = PXCacheRights.Select,
-        MapViewRights = PXCacheRights.Select)]
+        MapEnableRights = PXCacheRights.Select, MapViewRights = PXCacheRights.Select)]
         protected virtual IEnumerable hold2(PXAdapter adapter)
         {
             ///Validation
@@ -619,11 +564,12 @@ namespace GSynchExt
                     foreach (MTRequestDetails line in MatlRequestDet.Select())
                     {
                         MTRequestDetails matLine = line;
-                        matLine.RequestedQty = line.IssueQty;
+                        matLine.RequestedQty     = line.IssueQty;
                         MatlRequestDet.Update(matLine);
                         this.Actions.PressSave();
+                        
                         MTRequestDetails difLine = line;
-                        difLine.RequestedQty = line.RequestedQty - line.IssueQty;
+                        difLine.RequestedQty     = line.RequestedQty - line.IssueQty;
                         DeductInterimTable(difLine);
                     }
                 }
@@ -643,7 +589,6 @@ namespace GSynchExt
         {
             return adapter.Get();
         }
-
         #endregion
 
         #endregion
@@ -683,8 +628,7 @@ namespace GSynchExt
             foreach (MTRequestDetails line in MatlRequestDet.Select())
             {
                 DeductInterimTable(line);
-            }
-            
+            }           
         }
 
         public virtual MaterialTransferRequest CreateMTRequest(PMProject project)
@@ -698,7 +642,6 @@ namespace GSynchExt
         }
         public virtual MaterialTransferRequest CreateMTRequestFromProject(PMProject project, bool redirect = false)
         {
-
             CreateMTRequest(project);
 
             if (this.MatlRequest.Cache.IsDirty)
@@ -708,7 +651,6 @@ namespace GSynchExt
                 else
                     return this.MatlRequest.Current;
             }
-
             throw new PXException("");
         }
 
@@ -723,7 +665,7 @@ namespace GSynchExt
 
             var ReqPMGraph = PXGraph.CreateInstance<RequestedProjectMaterialsEntry>();
 
-            ReqPMGraph.ReqProjectMaterials.Current = existingRows;
+            ReqPMGraph.ReqProjectMaterials.Current               = existingRows;
             ReqPMGraph.ReqProjectMaterials.Current.RequestedQty -= row.RequestedQty ?? 0;
             ReqPMGraph.ReqProjectMaterials.Update(ReqPMGraph.ReqProjectMaterials.Current);
             ReqPMGraph.Actions.PressSave();
@@ -733,13 +675,13 @@ namespace GSynchExt
             RequestedProjectMaterials existingRows = RequestedProjectMaterials.PK.Find(this,
                         row.ProjectID, row.TaskID, row.AccountGroupID, row.CostCode, row.InventoryID);
             if (existingRows == null) return;
-            PMCostBudget budgetRow = PMCostBudget.PK.Find(this,
+            PMCostBudget budgetRow                 = PMCostBudget.PK.Find(this,
                                     row.ProjectID, row.TaskID, row.AccountGroupID, row.CostCode, row.InventoryID);
             if (budgetRow == null) return;
 
             var ReqPMGraph = PXGraph.CreateInstance<RequestedProjectMaterialsEntry>();
 
-            ReqPMGraph.ReqProjectMaterials.Current = existingRows;
+            ReqPMGraph.ReqProjectMaterials.Current               = existingRows;
             ReqPMGraph.ReqProjectMaterials.Current.RequestedQty += row.RequestedQty ?? 0;
             ReqPMGraph.ReqProjectMaterials.Update(ReqPMGraph.ReqProjectMaterials.Current);
             ReqPMGraph.Actions.PressSave();
@@ -749,48 +691,47 @@ namespace GSynchExt
         {
             totTranQty = Decimal.Zero;
             totIssueQty = Decimal.Zero;
-           // foreach (MTRequestDetails lines in graph.MatlRequestDet.Select().Where(x => x.Record.ReqNbr == mtr.ReqNbr))
-            {
                 /// Get all Transfers with reference to material request
-                foreach (INRegister matTransfers in PXSelect<INRegister,
-                                    Where<INRegister.docType, Equal<INDocType.transfer>,
-                                    And<INRegister.extRefNbr, Contains<Required<INRegister.extRefNbr>>>>>.Select(this, mtr.ReqNbr))
-                {
-
-                    INTran totalTranRec = PXSelectGroupBy<INTran,
-                        Where<INTran.refNbr, Equal<Required<INTran.refNbr>>,
-                        And<INTran.inventoryID, Equal<Required<INTran.inventoryID>>,
-                        And<INTran.toProjectID, Equal<Required<INTran.toProjectID>>,
-                        And<INTran.toTaskID, Equal<Required<INTran.toTaskID>>,
-                        And<INTran.toCostCodeID, Equal<Required<INTran.toCostCodeID>>,
-                        And<INTran.docType, Equal<Required<INTran.docType>>>>>>>>,
-                        Aggregate<GroupBy<INTran.projectID,
-                                    GroupBy<INTran.taskID,
-                                    GroupBy<INTran.costCodeID,
-                                    GroupBy<INTran.inventoryID, Sum<INTran.qty>>>>>>>.Select(graph, matTransfers.RefNbr, mtr.InventoryID, mtr.ProjectID, mtr.TaskID, mtr.CostCode, INDocType.Transfer);
-                    totTranQty += totalTranRec?.Qty ?? 0;
-                }
-                /// Get all Issues with reference to material request
-                /// 
-                foreach (INRegister matIssues in PXSelect<INRegister,
-                                    Where<INRegister.docType, Equal<INDocType.issue>,
-                                    And<INRegister.extRefNbr, Contains<Required<INRegister.extRefNbr>>>>>.Select(this, mtr.ReqNbr))
-                {
-
-                    INTran totalIssueRec = PXSelectGroupBy<INTran,
-                        Where<INTran.refNbr, Equal<Required<INTran.refNbr>>,
-                        And<INTran.inventoryID, Equal<Required<INTran.inventoryID>>,
-                        And<INTran.projectID, Equal<Required<INTran.projectID>>,
-                        And<INTran.taskID, Equal<Required<INTran.taskID>>,
-                        And<INTran.costCodeID, Equal<Required<INTran.costCodeID>>,
-                        And<INTran.docType, Equal<Required<INTran.docType>>>>>>>>,
-                        Aggregate<GroupBy<INTran.projectID,
-                                    GroupBy<INTran.taskID,
-                                    GroupBy<INTran.costCodeID,
-                                    GroupBy<INTran.inventoryID, Sum<INTran.qty>>>>>>>.Select(graph, matIssues.RefNbr, mtr.InventoryID, mtr.ProjectID, mtr.TaskID, mtr.CostCode, INDocType.Issue);
-                    totIssueQty += totalIssueRec?.Qty ?? 0;
-                }
+            foreach (INRegister matTransfers in PXSelect<INRegister,
+                                Where<INRegister.docType, Equal<INDocType.transfer>,
+                                And<INRegister.extRefNbr, Contains<Required<INRegister.extRefNbr>>>>>.Select(this, mtr.ReqNbr))
+            {
+                INTran totalTranRec = PXSelectGroupBy<INTran,
+                    Where<INTran.refNbr, Equal<Required<INTran.refNbr>>,
+                    And<INTran.inventoryID, Equal<Required<INTran.inventoryID>>,
+                    And<INTran.toProjectID, Equal<Required<INTran.toProjectID>>,
+                    And<INTran.toTaskID, Equal<Required<INTran.toTaskID>>,
+                    And<INTran.toCostCodeID, Equal<Required<INTran.toCostCodeID>>,
+                    And<INTran.docType, Equal<Required<INTran.docType>>,
+                    And<INTran.invtMult, Less<decimal0>>>>>>>>,
+                    Aggregate<GroupBy<INTran.toProjectID,
+                                GroupBy<INTran.toTaskID,
+                                GroupBy<INTran.toCostCodeID,
+                                GroupBy<INTran.inventoryID, Sum<INTran.qty>>>>>>>.Select(graph, matTransfers.RefNbr, mtr.InventoryID, mtr.ProjectID, mtr.TaskID, mtr.CostCode, INDocType.Transfer);
+                totTranQty += totalTranRec?.Qty ?? 0;
             }
+
+            /// Get all Issues with reference to material request
+               
+            foreach (INRegister matIssues in PXSelect<INRegister,
+                                Where<INRegister.docType, Equal<INDocType.issue>,
+                                And<INRegister.extRefNbr, Contains<Required<INRegister.extRefNbr>>>>>.Select(this, mtr.ReqNbr))
+            {
+
+                INTran totalIssueRec = PXSelectGroupBy<INTran,
+                    Where<INTran.refNbr, Equal<Required<INTran.refNbr>>,
+                    And<INTran.inventoryID, Equal<Required<INTran.inventoryID>>,
+                    And<INTran.projectID, Equal<Required<INTran.projectID>>,
+                    And<INTran.taskID, Equal<Required<INTran.taskID>>,
+                    And<INTran.costCodeID, Equal<Required<INTran.costCodeID>>,
+                    And<INTran.docType, Equal<Required<INTran.docType>>>>>>>>,
+                    Aggregate<GroupBy<INTran.projectID,
+                                GroupBy<INTran.taskID,
+                                GroupBy<INTran.costCodeID,
+                                GroupBy<INTran.inventoryID, Sum<INTran.qty>>>>>>>.Select(graph, matIssues.RefNbr, mtr.InventoryID, mtr.ProjectID, mtr.TaskID, mtr.CostCode, INDocType.Issue);
+                totIssueQty += totalIssueRec?.Qty ?? 0;
+            }
+            
         }
         public void ReCalTranIssueQuantities(MaterialTransferRequestEntry graph, MaterialTransferRequest mtr, string docType)
         {
@@ -798,7 +739,7 @@ namespace GSynchExt
             {
                 //03212024 - Recalculate Qty Improvements Start
                 /// Get all Transfers with reference to material request
-                /// 
+                
                 if (docType == INDocType.Transfer)
                 {
                     decimal totTranQty = Decimal.Zero;
@@ -820,19 +761,16 @@ namespace GSynchExt
                                      GroupBy<INTran.costCodeID, 
                                      GroupBy<INTran.inventoryID, Sum<INTran.qty>>>>>>>.Select(graph, matTransfers.RefNbr, lines.InventoryID, lines.ProjectID, lines.TaskID, lines.CostCode, docType);
                         totTranQty += totalTranRec?.Qty ?? 0;
+                        ///Update the qty if even 0
+                        lines.TransferQty = totTranQty;
+                        graph.MatlRequestDet.Update(lines);
 
-                    //    if (lines.TransferQty != totTranQty)
-                        {
-                            ///Update the qty if even 0
-                            lines.TransferQty = totTranQty;
-                            graph.MatlRequestDet.Update(lines);
-                        }
 
                     }
 
                 }
                 /// Get all Issues with reference to material request
-                /// 
+ 
                 if (docType == INDocType.Issue)
                 {
                     decimal totIssueQty = Decimal.Zero;
@@ -854,16 +792,9 @@ namespace GSynchExt
                                      GroupBy<INTran.costCodeID,
                                      GroupBy<INTran.inventoryID, Sum<INTran.qty>>>>>>>.Select(graph, matIssues.RefNbr, lines.InventoryID, lines.ProjectID, lines.TaskID, lines.CostCode, docType);
                         totIssueQty += totalIssueRec?.Qty ?? 0;
-
-
-                     //   if (lines.IssueQty != totIssueQty)
-                        {
-                            
-                            lines.IssueQty = totIssueQty;
-                            graph.MatlRequestDet.Update(lines);
-               
-                        }
-
+       
+                        lines.IssueQty = totIssueQty;
+                        graph.MatlRequestDet.Update(lines);
                     }
 
                 }
@@ -898,35 +829,9 @@ namespace GSynchExt
                 totRequestedQty = totalRec?.RequestedQty ?? 0;
             }
         }
-
-    /*    public void GetLatestRequestQtyPerBudgetItem(PMCostBudget budget, MaterialTransferRequest reqRow, out decimal? totRequestedQty)
-        {
-
-            totRequestedQty = 0;
-            if (reqRow == null || budget == null) return;
-            //Get the total requested quantity from All material Requests with status released for that item, project, task and cost code
-
-            MTRequestDetails totalRec = PXSelectJoinGroupBy<MTRequestDetails,
-                    InnerJoin<MaterialTransferRequest,
-                    On<MTRequestDetails.reqNbr, Equal<MaterialTransferRequest.reqNbr>>>,
-                    Where<MaterialTransferRequest.status, Equal<Required<MaterialTransferRequest.status>>,
-                    And<MTRequestDetails.projectID, Equal<Required<MTRequestDetails.projectID>>,
-                    And<MTRequestDetails.taskID, Equal<Required<MTRequestDetails.taskID>>,
-                    And<MTRequestDetails.inventoryID, Equal<Required<MTRequestDetails.inventoryID>>,
-                    And<MTRequestDetails.costCode, Equal<Required<MTRequestDetails.costCode>>>>>>>,
-                    Aggregate<GroupBy<MTRequestDetails.projectID,
-                    GroupBy<MTRequestDetails.inventoryID,
-                    GroupBy<MTRequestDetails.taskID,
-                    GroupBy<MTRequestDetails.costCode,
-                        Sum<MTRequestDetails.requestedQty>>>>>>>.Select(this, GSynchExt.FTRStatus.Released, reqRow.ProjectID, budget.TaskID, budget.InventoryID, budget.CostCodeID);
-
-            if (totalRec != null)
-            {
-                totRequestedQty = totalRec?.RequestedQty ?? 0;
-            }
-        }*/
-        #endregion
     }
+    #endregion
+
     #region Dialogs
     [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     [PXHidden]
@@ -940,6 +845,14 @@ namespace GSynchExt
         //   [PXDefault(false, PersistingCheck = PXPersistingCheck.Nothing)]
         public virtual bool? CheckAvailableQty { get; set; }
         public abstract class checkAvailableQty : PX.Data.BQL.BqlBool.Field<checkAvailableQty> { }
+        #endregion
+
+        #region ActiveTask
+        [PXDBBool()]
+        [PXUIField(DisplayName = "Active Task Only")]
+        [PXDefault(true, PersistingCheck = PXPersistingCheck.Nothing)]
+        public virtual bool? ActiveTask { get; set; }
+        public abstract class activeTask : PX.Data.BQL.BqlBool.Field<activeTask> { }
         #endregion
 
 

@@ -19,12 +19,16 @@ using PX.TM;
 
 namespace PX.Objects.PM
 {
-    public class PMTaskGSExt : PXCacheExtension<PX.Objects.PM.PMTask>
+    public sealed class PMTaskGSExt : PXCacheExtension<PX.Objects.PM.PMTask>
     {
+        #region IsActive
+        public static bool IsActive() { return PXAccess.FeatureInstalled<FeaturesSet.inventory>(); }
+        #endregion
+
         #region UsrLeadDays
         [PXDBInt]
         [PXUIField(DisplayName = "Lead Days")]
-        public virtual int? UsrLeadDays { get; set; }
+        public int? UsrLeadDays { get; set; }
         public abstract class usrLeadDays : PX.Data.BQL.BqlInt.Field<usrLeadDays> { }
         #endregion
         //IsComplDocReq  bool default false. Null able
@@ -32,13 +36,13 @@ namespace PX.Objects.PM
         [PXDBBool()]
         [PXUIField(DisplayName = "Compliance Docs Required")]
      //   [PXDefault(false, PersistingCheck = PXPersistingCheck.Nothing)]
-        public virtual bool? UsrIsComplDocReq { get; set; }
+        public bool? UsrIsComplDocReq { get; set; }
         public abstract class usrIsComplDocReq : PX.Data.BQL.BqlBool.Field<usrIsComplDocReq> { }
         #endregion
 
         #region UsrOwnerID
         [PX.TM.Owner(Visibility = PXUIVisibility.SelectorVisible)]
-        public virtual int? UsrOwnerID { get; set; }
+        public int? UsrOwnerID { get; set; }
         public abstract class usrOwnerID : PX.Data.BQL.BqlInt.Field<usrOwnerID> { }
         #endregion
 
@@ -46,21 +50,21 @@ namespace PX.Objects.PM
         [PXDBInt]
         [PXUIField(DisplayName = "Predecessor Task ID - Not Used")]
         //[PXSelector(typeof(Search<PMTask.taskID, Where<PMTask.projectID, Equal<Current<PMTask.projectID>>>>), SubstituteKey = typeof(PMTask.taskCD))]
-        public virtual int? UsrPredecessorTaskID { get; set; }
+        public int? UsrPredecessorTaskID { get; set; }
         public abstract class usrPredecessorTaskID : PX.Data.BQL.BqlInt.Field<usrPredecessorTaskID> { }
         #endregion
 
         #region UsrPredecessorTaskCD
         [PXDBString(30)]
         [PXUIField(DisplayName = "Predecessor Task")]
-        public virtual string UsrPredecessorTaskCD { get; set; }
+        public string UsrPredecessorTaskCD { get; set; }
         public abstract class usrPredecessorTaskCD : PX.Data.BQL.BqlString.Field<usrPredecessorTaskCD> { }
         #endregion
 
         #region UsrNotifier
         [PX.TM.Owner(Visibility = PXUIVisibility.SelectorVisible)]
         [PXUIField(DisplayName = "Notifier")]
-        public virtual int? UsrNotifier { get; set; }
+        public int? UsrNotifier { get; set; }
         public abstract class usrNotifier : PX.Data.BQL.BqlInt.Field<usrNotifier> { }
         #endregion
 
@@ -71,7 +75,7 @@ namespace PX.Objects.PM
         [PXUIField(DisplayName = "Workgroup", Visibility = PXUIVisibility.SelectorVisible)]
         [PXSelector(typeof(Search<EPCompanyTree.workGroupID>), SubstituteKey = typeof(EPCompanyTree.description))]
 
-        public virtual int? UsrNotifyWorkgroup
+        public int? UsrNotifyWorkgroup
         {
             get;
             set;

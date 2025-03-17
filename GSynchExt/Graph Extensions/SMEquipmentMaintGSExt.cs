@@ -18,7 +18,10 @@ namespace PX.Objects.FS
 {
     public class SMEquipmentMaintGSExt : PXGraphExtension<SMEquipmentMaint>    
     {
-      
+        #region IsActive
+        public static bool IsActive() { return PXAccess.FeatureInstalled<FeaturesSet.inventory>(); }
+        #endregion
+
         protected virtual void _(Events.RowPersisting<FSEquipment> e)
         {
 

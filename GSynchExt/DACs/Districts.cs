@@ -2,7 +2,6 @@
 using PX.Data;
 using PX.Data.BQL.Fluent;
 using PX.Data.ReferentialIntegrity.Attributes;
-using PX.Objects.CS;
 
 namespace GSynchExt
 {

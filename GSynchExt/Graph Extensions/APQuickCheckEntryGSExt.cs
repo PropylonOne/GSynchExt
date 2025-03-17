@@ -23,6 +23,9 @@ using PX.Objects.AP.Standalone;
 namespace PX.Objects.AP {
     public class APQuickCheckEntryGSExt : PXGraphExtension<APQuickCheckEntry>
     {
+        #region IsActive
+        public static bool IsActive() { return PXAccess.FeatureInstalled<FeaturesSet.inventory>(); }
+        #endregion
         [PXImport]
         public PXSelect<APTran, Where<APTran.tranType, Equal<Current<APQuickCheck.docType>>, And<APTran.refNbr, Equal<Current<APQuickCheck.refNbr>>>>> Transactions;
 

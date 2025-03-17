@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using PX.Data;
 using PX.Objects.CA;
+using PX.Objects.CS;
 using PX.Objects.IN;
 using PX.Objects.PM;
 using static PX.Data.BQL.BqlPlaceholder;
@@ -12,6 +13,9 @@ namespace GSynchExt
 {
     public class CashTransferEntryGSExt : PXGraphExtension<CashTransferEntry>
     {
+        #region IsActive
+        public static bool IsActive() { return PXAccess.FeatureInstalled<FeaturesSet.inventory>(); }
+        #endregion
         public virtual CATransfer CreateTransferFromFTR(FundTransferRequest fTRequest, bool redirect = false)
         {
 
@@ -29,8 +33,7 @@ namespace GSynchExt
 
                 }
             }
-            throw new PXException("");
-
+            throw new PXException(Messages.NOFTRCreated);
         }
 
         public virtual CATransfer CreateTransfer(FundTransferRequest fTRequest)
@@ -101,7 +104,7 @@ namespace GSynchExt
                         {
                             throw new PXException(GSynchExt.Messages.ValidateCAAmount, oldOpenBal);
                         }
-                        FTRGraph.EmpRequest.Current.Requested = true;
+                          FTRGraph.EmpRequest.Current.Requested = true;
                         FTRGraph.EmpRequest.Update(FTRGraph.EmpRequest.Current);
                         FTRGraph.Actions.PressSave();
                     }

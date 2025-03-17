@@ -29,8 +29,11 @@ namespace GSynchExt
 {
     public class DailyFieldReportEntryGSExt : PXGraphExtension<DailyFieldReportEntry>, PXImportAttribute.IPXPrepareItems
 	{
-		#region Selects
-		public PXSetup<PMProject>.Where<PMProject.contractID.IsEqual<DailyFieldReport.projectId.FromCurrent>> Project;
+        #region IsActive
+        public static bool IsActive() { return PXAccess.FeatureInstalled<FeaturesSet.inventory>(); }
+        #endregion
+        #region Selects
+        public PXSetup<PMProject>.Where<PMProject.contractID.IsEqual<DailyFieldReport.projectId.FromCurrent>> Project;
 		public PXSetup<PMSetup> Setup;
 		public SelectFrom<PMProgressWorksheetLine>
 				.LeftJoin<DailyFieldReportProgressWorksheet>

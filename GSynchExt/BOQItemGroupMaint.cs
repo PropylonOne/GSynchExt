@@ -10,6 +10,5 @@ namespace GSynchExt
         public PXSelect<BOQGroupItems,
              Where<BOQGroupItems.groupID, Equal<Current<BOQGroupItems.groupID>>>> DetailsView;
 
-
     }
 }

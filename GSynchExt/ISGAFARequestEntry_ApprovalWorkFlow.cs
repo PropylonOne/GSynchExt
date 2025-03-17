@@ -6,56 +6,49 @@ using PX.Data;
 using static PX.Data.PXDatabase;
 using PX.Data.WorkflowAPI;
 using PX.Objects.Common;
+using PX.Objects.SO;
+using PX.Objects.PO;
 
 namespace GSynchExt
 {
-	using State = FundTransferRequestWorkflow.States;
-	using Self = FundTransferRequestEntry_ApprovalWorkflow;
-	using Context = WorkflowContext<FundTransferRequestEntry, FundTransferRequest>;
-	using static FundTransferRequest;
-	using static BoundedTo<FundTransferRequestEntry, FundTransferRequest>;
-
-	public class FundTransferRequestEntry_ApprovalWorkflow : PXGraphExtension<FundTransferRequestWorkflow, FundTransferRequestEntry>
+	using State   = ISGAFARequestEntry_WorkFlow.States;
+	using Self    = ISGAFARequestEntry_ApprovalWorkFlow;
+	using Context = WorkflowContext<ISGAFARequestEntry, ISGAFARequest>;
+	using static ISGAFARequest;
+	using static BoundedTo<ISGAFARequestEntry, ISGAFARequest>;
+    using static GSynchExt.ISGAFARequestLine.FK;
+	public class ISGAFARequestEntry_ApprovalWorkFlow : PXGraphExtension<ISGAFARequestEntry_WorkFlow, ISGAFARequestEntry>
 	{
-		private class FTRApproval : IPrefetchable
+		private class FAReqApproval : IPrefetchable
 		{
-			public static bool IsActive => PXDatabase.GetSlot<FTRApproval>(nameof(FTRApproval), typeof(FundTransferRequestSetup)).RequireApproval;
-
+			public static bool IsActive => PXDatabase.GetSlot<FAReqApproval>(nameof(FAReqApproval), typeof(ISGAFARequestSetup)).RequireApproval;
 			private bool RequireApproval;
-
 			void IPrefetchable.Prefetch()
 			{
-				using (PXDataRecord fTRSetup = PXDatabase.SelectSingle<FundTransferRequestSetup>(new PXDataField<FundTransferRequestSetup.approvalMap>()))
+				using (PXDataRecord fARequestSetup = PXDatabase.SelectSingle<ISGAFARequestSetup>(new PXDataField<ISGAFARequestSetup.fARequestapprovalMap>()))
 				{
-					if (fTRSetup != null)
-						RequireApproval = fTRSetup.GetBoolean(0) ?? false;
+					if (fARequestSetup != null)
+						RequireApproval = fARequestSetup.GetBoolean(0) ?? false;
 				}
 			}
 		}
-
 		public class Conditions : Condition.Pack
 		{
 			public Condition IsApproved => GetOrCreate(b => b.FromBql<approved.IsEqual<True>>());
-
 			public Condition IsRejected => GetOrCreate(b => b.FromBql<rejected.IsEqual<True>>());
 		}
-
-		[PXWorkflowDependsOnType(typeof(FundTransferRequestSetup))]
-		public override void Configure(PXScreenConfiguration config)
+        [PXWorkflowDependsOnType(typeof(ISGAFARequestSetup), typeof(ISGAFARequestSetupApproval))]
+        public override void Configure(PXScreenConfiguration config)
 		{
-			if (FTRApproval.IsActive)
-				Configure(config.GetScreenConfigurationContext<FundTransferRequestEntry, FundTransferRequest>());
+			if (FAReqApproval.IsActive)
+				Configure(config.GetScreenConfigurationContext<ISGAFARequestEntry, ISGAFARequest>());
 			else
-				HideApprovalActions(config.GetScreenConfigurationContext<FundTransferRequestEntry, FundTransferRequest>());
+				HideApprovalActions(config.GetScreenConfigurationContext<ISGAFARequestEntry, ISGAFARequest>());
 		}
-
 		protected virtual void Configure(Context context)
 		{
 			var conditions = context.Conditions.GetPack<Conditions>();
-			
 			(var approve, var reject, var approvalCategory) = GetApprovalActions(context, hidden: false);
-
-
 			context.UpdateScreenConfigurationFor(screen =>
 			{
 				return screen
@@ -70,7 +63,7 @@ namespace GSynchExt
 									{
 										actions.Add(approve, a => a.IsDuplicatedInToolbar());
 										actions.Add(reject, a => a.IsDuplicatedInToolbar());
-                                        actions.Add(g => g.Hold2, a => a.IsDuplicatedInToolbar());
+                                        actions.Add(g => g.hold, a => a.IsDuplicatedInToolbar());
                                     });
 							});
 							states.Add<State.rejected>(flowState =>
@@ -78,7 +71,7 @@ namespace GSynchExt
 								return flowState
 									.WithActions(actions =>
 									{
-										actions.Add(g => g.Hold2, a => a.IsDuplicatedInToolbar());
+										actions.Add(g => g.hold, a => a.IsDuplicatedInToolbar());
 									});
 							});
 						})
@@ -88,34 +81,33 @@ namespace GSynchExt
 							{
 								ts.Add(t => t
 									.To<State.pendingApproval>()
-									.IsTriggeredOn(g => g.RemoveHold).When(!conditions.IsApproved));
+									.IsTriggeredOn(g => g.removeHold).When(!conditions.IsApproved));
 							});
 							transitions.AddGroupFrom<State.pendingApproval>(ts =>
 							{
 								ts.Add(t => t
-									.To<State.released>()
+									.To<State.open>()
 									.IsTriggeredOn(approve));
 								ts.Add(t => t
 									.To<State.rejected>()
 									.IsTriggeredOn(reject));
                                 ts.Add(t => t
                                     .To<State.onHold>()
-                                    .IsTriggeredOn(g => g.Hold2));
+                                    .IsTriggeredOn(g => g.hold));
                             });
                             transitions.AddGroupFrom<State.rejected>(ts =>
                             {
 								ts.Add(t => t
 									.To<State.onHold>()
-									.IsTriggeredOn(g => g.Hold2)); ;
+									.IsTriggeredOn(g => g.hold)); ;
                             });
-
                         }))
 					.WithActions(actions =>
 					{
 						actions.Add(approve);
 						actions.Add(reject);
 						actions.Update(
-							g => g.Hold2,
+							g => g.hold,
 							a => a.WithFieldAssignments(fas =>
 							{
 								fas.Add<approved>(false);
@@ -128,7 +120,6 @@ namespace GSynchExt
 					});
 			});
 		}
-
 		protected virtual void HideApprovalActions(Context context)
 		{
 			(var approve, var reject, _) = GetApprovalActions(context, hidden: true);
@@ -143,7 +134,6 @@ namespace GSynchExt
 					});
 			});
 		}
-
 		protected virtual (ActionDefinition.IConfigured approve, ActionDefinition.IConfigured reject, ActionCategory.IConfigured approvalCategory) GetApprovalActions(Context context, bool hidden)
 		{
 			#region Categories
@@ -151,11 +141,10 @@ namespace GSynchExt
 					category => category.DisplayName(CommonActionCategories.DisplayNames.Approval)
 					.PlaceAfter(CommonActionCategories.ProcessingCategoryID));
 			#endregion
-
 			var approve = context.ActionDefinitions
 				.CreateExisting<Self>(g => g.approve, a => a
 				.WithCategory(approvalCategory)
-				.PlaceAfter(g => g.RemoveHold)
+				.PlaceAfter(g => g.removeHold)
 				.With(it => hidden ? it.IsHiddenAlways() : it)
 				.WithFieldAssignments(fa => fa.Add<approved>(true)));
 			var reject = context.ActionDefinitions
@@ -164,15 +153,31 @@ namespace GSynchExt
 				.PlaceAfter(approve)
 				.With(it => hidden ? it.IsHiddenAlways() : it)
 				.WithFieldAssignments(fa => fa.Add<rejected>(true)));
-			return (approve, reject, approvalCategory);
+            return (approve, reject, approvalCategory);
 		}
-
-		public PXAction<FundTransferRequest> approve;
+		public PXAction<ISGAFARequest> approve;
 		[PXButton(CommitChanges = true), PXUIField(DisplayName = "Approve", MapEnableRights = PXCacheRights.Select, MapViewRights = PXCacheRights.Select)]
-		protected virtual IEnumerable Approve(PXAdapter adapter) => adapter.Get();
-
-		public PXAction<FundTransferRequest> reject;
+		protected virtual IEnumerable Approve(PXAdapter adapter)
+		{
+			if (this.Base.FARequest.Current != null)
+			{
+				this.Base.FARequest.Current.ApprovedDate = this.Base.Accessinfo.BusinessDate;
+				this.Base.FARequest.Current.ApprovedBy = ISGAFARequestEntry.GetCurrentEmployee(this.Base)?.BAccountID;
+				this.Base.Actions.PressSave();
+			}
+			return adapter.Get();
+		}
+		public PXAction<ISGAFARequest> reject;
 		[PXButton(CommitChanges = true), PXUIField(DisplayName = "Reject", MapEnableRights = PXCacheRights.Select, MapViewRights = PXCacheRights.Select)]
-		protected virtual IEnumerable Reject(PXAdapter adapter) => adapter.Get();
+		protected virtual IEnumerable Reject(PXAdapter adapter)
+		{
+			if (this.Base.FARequest.Current != null)
+			{
+				this.Base.FARequest.Current.RejectedDate = this.Base.Accessinfo.BusinessDate;
+				this.Base.FARequest.Current.RejectedBy = ISGAFARequestEntry.GetCurrentEmployee(this.Base)?.BAccountID;
+				this.Base.Actions.PressSave();
+			}
+			return adapter.Get();
+		}
 	}
 }

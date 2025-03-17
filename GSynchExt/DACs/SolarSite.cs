@@ -1,5 +1,4 @@
 using System;
-using System.ComponentModel;
 using PX.Data;
 using PX.Data.BQL;
 using PX.Data.EP;
@@ -9,16 +8,11 @@ using PX.Objects.AP;
 using PX.Objects.CR;
 using PX.Objects.CS;
 using PX.Objects.CT;
-using PX.Objects.EP;
 using PX.Objects.IN;
 using PX.Objects.PM;
 using PX.Objects.PO;
 using PX.TM;
 using static GSynchExt.SolarSiteEntry;
-using static PX.Data.PXAccess;
-using static PX.Data.PXGenericInqGrph;
-using static PX.Objects.IN.InventoryItem;
-using static PX.Objects.TX.CSTaxCalcType;
 
 namespace GSynchExt
 {
@@ -27,7 +21,6 @@ namespace GSynchExt
     [PXPrimaryGraph(typeof(SolarSiteEntry))]
     public class SolarSite : PXBqlTable, IBqlTable, IAssign, ISolarSiteFilter
     {
-
         #region Keys
         public class PK : PrimaryKeyOf<SolarSite>.By<solarSiteID>
         {
@@ -38,7 +31,14 @@ namespace GSynchExt
         public class UK : PrimaryKeyOf<SolarSite>.By<solarSiteCD>
         {
             public static SolarSite Find(PXGraph graph, string solarSiteCD) => FindBy(graph, solarSiteCD);
+
         }
+        public class FK
+        {
+            public class Phase : GSynchExt.Phase.PK.ForeignKeyOf<SolarSite>.By<phaseID, province> { }
+        }
+
+
         #endregion
 
         #region Events
@@ -135,7 +135,7 @@ namespace GSynchExt
         #region EstSiteValue
         public abstract class estSiteValue : PX.Data.BQL.BqlDecimal.Field<estSiteValue> { }
         [PXDBDecimal(2)]
-        [PXUIField(DisplayName = "Estimated Site Value (LKR)", Visibility = PXUIVisibility.Visible)]
+        [PXUIField(DisplayName = "Estimated Site Value (LKR)", Visibility = PXUIVisibility.Visible, Enabled = false)]
         public virtual decimal? EstSiteValue
         {
             get;
@@ -219,6 +219,7 @@ namespace GSynchExt
 
         [PXDBString(30, IsUnicode = true, InputMask = ">CCCCCCCCCCCCCCCCCCCCCCCCCCCCCC")]
         [PXUIField(DisplayName = "CEB Account")]
+        [PXCheckUnique(ErrorMessage = Messages.CEBAccountIsNotUnique)]
         public virtual string CEBAccount { get; set; }
         public abstract class cEBAccount : PX.Data.BQL.BqlString.Field<cEBAccount> { }
         #endregion
@@ -280,7 +281,8 @@ namespace GSynchExt
         [PXDBString(3, IsUnicode = true, InputMask = ">CCC")]
         [PXUIField(DisplayName = "Phase ID")]
         [PXSelector(typeof(Search<Phase.phaseID, Where<GSynchExt.Phase.stateID, Equal<Current<GSynchExt.SolarSite.province>>>>))]
-    // [PXRestrictor(typeof(Where<GSynchExt.Phase.stateID.IsEqual<GSynchExt.SolarSite.province.FromCurrent>>), "Invalid Phase")]
+        [PXForeignReference(typeof(FK.Phase))]
+        // [PXRestrictor(typeof(Where<GSynchExt.Phase.stateID.IsEqual<GSynchExt.SolarSite.province.FromCurrent>>), "Invalid Phase")]
 
         public virtual string PhaseID { get; set; }
         public abstract class phaseID : PX.Data.BQL.BqlString.Field<phaseID> { }
@@ -296,23 +298,6 @@ namespace GSynchExt
         public virtual string ClusterID { get; set; }
         public abstract class clusterID : PX.Data.BQL.BqlString.Field<clusterID> { }
         #endregion
-        /*
-        #region CEBOffice
-        [PXString(30, IsUnicode = true, InputMask = "")]
-        [PXUIField(DisplayName = "CEB Office")]
-        [PXDefault(typeof(Search<LatestCompletedSurveys.cEBOffice, Where<LatestCompletedSurveys.solarSiteID, Equal<Current<solarSiteID>>>>), PersistingCheck = PXPersistingCheck.Nothing)]
-        public virtual string CEBOffice { get; set; }
-        public abstract class cEBOffice : PX.Data.BQL.BqlString.Field<cEBOffice> { }
-        #endregion
-
-        #region Lecooffice
-        [PXString(30, IsUnicode = true, InputMask = "")]
-        [PXUIField(DisplayName = "LECO Office")]
-        [PXDefault(typeof(Search<LatestCompletedSurveys.lecooffice, Where<LatestCompletedSurveys.solarSiteID, Equal<Current<lecooffice>>>>), PersistingCheck = PXPersistingCheck.Nothing)]
-        public virtual string Lecooffice { get; set; }
-        public abstract class lecooffice : PX.Data.BQL.BqlString.Field<lecooffice> { }
-        #endregion
-        */
 
         #region FieldExecutive
         [PXDBString(30, IsUnicode = true, InputMask = "")]
@@ -328,7 +313,6 @@ namespace GSynchExt
         public virtual DateTime? StartDate { get; set; }
         public abstract class startDate : PX.Data.BQL.BqlDateTime.Field<startDate> { }
         #endregion
-
 
         #region InServiceDate
         [PXDBDate()]
@@ -350,7 +334,6 @@ namespace GSynchExt
         public virtual DateTime? ProjPlannedStartDate { get; set; }
         public abstract class projPlannedStartDate : PX.Data.BQL.BqlDateTime.Field<projPlannedStartDate> { }
         #endregion
-
 
         #region ConstructionStartDate
         [PXDBDate()]

@@ -93,7 +93,6 @@ namespace GSynchExt
     public abstract class uom : PX.Data.BQL.BqlString.Field<uom> { }
         #endregion
 */
-
     #region UOM
         public abstract class uOM : PX.Data.BQL.BqlString.Field<uOM> { }
         [PXDefault(typeof(Search<InventoryItem.purchaseUnit, Where<InventoryItem.inventoryID, Equal<Current<SolarSiteRevGen.inventoryID>>>>), PersistingCheck = PXPersistingCheck.Nothing)]
@@ -148,7 +147,7 @@ namespace GSynchExt
     [PXUIField(DisplayName = "Actual Qty")]
     public virtual Decimal? ActualQty { get; set; }
     public abstract class actualQty : PX.Data.BQL.BqlDecimal.Field<actualQty> { }
-    #endregion
+    #endregion         
 
     #region InvSolarAmount       
         [PXDecimal]

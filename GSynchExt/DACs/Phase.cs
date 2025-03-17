@@ -2,6 +2,7 @@ using System;
 using PX.Data;
 using PX.Data.BQL.Fluent;
 using PX.Data.ReferentialIntegrity.Attributes;
+using PX.Objects.PM;
 
 namespace GSynchExt
 {
@@ -15,9 +16,11 @@ namespace GSynchExt
         {
             public static Phase Find(PXGraph graph, string stateID, string phaseID) => FindBy(graph, stateID, phaseID);
             public static Phase FindDirty(PXGraph graph, string stateID, string phaseID)
-                => (Phase)PXSelect<Phase, Where<phaseID, Equal<Required<phaseID>>, 
+                => (Phase)PXSelect<Phase, Where<phaseID, Equal<Required<phaseID>>,
                     And<Phase.stateID, Equal<Required<stateID>>>>>.SelectWindowed(graph, 0, 1, phaseID, stateID);
         }
+
+
         #endregion
 
         #region StateID
@@ -37,7 +40,7 @@ namespace GSynchExt
         #region PhaseID
         [PXDBString(3, IsKey = true, IsUnicode = true, InputMask = ">CCC")]
         [PXUIField(DisplayName = "Phase ID")]
-      //  [PXReferentialIntegrityCheck]
+
         public virtual string PhaseID { get; set; }
         public abstract class phaseID : PX.Data.BQL.BqlString.Field<phaseID> { }
         #endregion
@@ -47,6 +50,13 @@ namespace GSynchExt
         [PXUIField(DisplayName = "Description")]
         public virtual string Description { get; set; }
         public abstract class description : PX.Data.BQL.BqlString.Field<description> { }
+        #endregion
+
+        #region EstimatedCost
+        [PXDBDecimal]
+        [PXUIField(DisplayName = "Estimated Cost (kW)")]
+        public virtual decimal? EstimatedCost { get; set; }
+        public abstract class estimatedCost : PX.Data.BQL.BqlDecimal.Field<estimatedCost> { }
         #endregion
 
         #region CreatedDateTime

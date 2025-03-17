@@ -28,8 +28,12 @@ using PX.Objects.GL;
 
 namespace PX.Objects.RQ
 {
-  public class RQRequisitionGSExt : PXCacheExtension<PX.Objects.RQ.RQRequisition>
+  public sealed class RQRequisitionGSExt : PXCacheExtension<PX.Objects.RQ.RQRequisition>
   {
+        #region IsActive
+        public static bool IsActive() { return PXAccess.FeatureInstalled<FeaturesSet.inventory>(); }
+        #endregion
+
         public class FK
         {
             public class Project : PMProject.PK.ForeignKeyOf<RQRequisition>.By<usrProjectID> { }
@@ -44,7 +48,7 @@ namespace PX.Objects.RQ
         [PXDBInt]
         [PXUIField(DisplayName = "Project Ref.")]
         [PXSelector(typeof(Search<PMProject.contractID>), SubstituteKey = (typeof(PMProject.contractCD)))]
-        public virtual Int32? UsrProjectID
+        public Int32? UsrProjectID
         {
             get
             {
@@ -70,7 +74,7 @@ namespace PX.Objects.RQ
             DescriptionField = typeof(Sub.description)
             )]
 
-        public virtual int? UsrMassSubItem { get; set; }
+        public int? UsrMassSubItem { get; set; }
         public abstract class usrMassSubItem : PX.Data.BQL.BqlInt.Field<usrMassSubItem> { }
         #endregion
 
@@ -78,7 +82,7 @@ namespace PX.Objects.RQ
 
         [Site(DisplayName = "Warehouse", DescriptionField = typeof(INSite.descr))]
 
-        public virtual int? UsrSiteID { get; set; }
+        public int? UsrSiteID { get; set; }
         public abstract class usrSiteID : PX.Data.BQL.BqlInt.Field<usrSiteID> { }
     #endregion
 

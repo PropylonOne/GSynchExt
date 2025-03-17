@@ -12,6 +12,10 @@ namespace GSynchExt
 {
     public class PettyCashPayment : PXGraphExtension<APPaymentEntry>
     {
+        #region IsActive
+        public static bool IsActive() { return PXAccess.FeatureInstalled<FeaturesSet.inventory>(); }
+        #endregion
+
 
         #region Constants
         private string screenID = PXContext.GetScreenID();

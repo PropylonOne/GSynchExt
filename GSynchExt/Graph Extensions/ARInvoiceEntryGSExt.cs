@@ -3,6 +3,7 @@ using System.Linq;
 using PX.Data;
 using PX.Objects.AP;
 using PX.Objects.AR;
+using PX.Objects.CS;
 using PX.Objects.PM;
 using PX.TM;
 using static PX.Objects.RQ.RQRequisitionContent.FK;
@@ -14,6 +15,9 @@ namespace GSynchExt
     /// </summary>
     public class ARInvoiceEntryGSExt : PXGraphExtension<ARInvoiceEntry>
     {
+        #region IsActive
+        public static bool IsActive() { return PXAccess.FeatureInstalled<FeaturesSet.inventory>(); }
+        #endregion
         #region DAC Overrides
         [PXMergeAttributes(Method = MergeMethod.Merge)]
         [PXUIField(Enabled = false)]

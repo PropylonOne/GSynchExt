@@ -2,28 +2,16 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Remoting.Metadata.W3cXsd2001;
 //using Newtonsoft.Json;
-using PX.Common.Collection;
 using PX.Data;
 using PX.Objects.AR;
-using PX.Objects.CS;
-using PX.Objects.FA;
 using PX.Objects.GL.FinPeriods.TableDefinition;
 using PX.Objects.GL;
 using PX.Objects.IN;
 using PX.Objects.PM;
-using PX.Objects.SO;
-using static PX.Common.PXReflectionSerializer;
-using static PX.Data.BQL.BqlPlaceholder;
-using static PX.Objects.FA.FABookSettings.midMonthType;
 using static PX.Objects.PM.GSProjectHelper;
-using static GSynchExt.SolarSiteEntry;
 using PX.Objects.CM;
-using PX.Objects.GL.FinPeriods;
 using PX.Objects.AP;
-using PX.Objects.AR.CCPaymentProcessing;
-using PX.Objects.IN.Overrides.INDocumentRelease;
 
 namespace GSynchExt
 {
@@ -136,7 +124,6 @@ namespace GSynchExt
                 row.StampDutyAmount = CalculateStampDuty(row);
             }
         }
-
         protected virtual void _(Events.FieldUpdating<SolarRevGenDetails, SolarRevGenDetails.inverterQty> e)
         {
             SolarRevGenDetails row = e.Row as SolarRevGenDetails;
@@ -335,6 +322,7 @@ namespace GSynchExt
 
         protected virtual IEnumerable createInvoice(PXAdapter adapter)
         {
+            // Acuminator disable once PX1008 LongOperationDelegateSynchronousExecution [Justification]
             PXLongOperation.StartOperation(this, delegate ()
             {
                 try

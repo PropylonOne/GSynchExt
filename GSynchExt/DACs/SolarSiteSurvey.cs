@@ -280,6 +280,7 @@ namespace GSynchExt
             get;
             set;
         }
+        public abstract class latitude : PX.Data.BQL.BqlDecimal.Field<latitude> { }
 
         [PXDBDecimal(9, MaxValue = 180f, MinValue = -180f)]
         [PXUIField(DisplayName = "Longitude")]
@@ -288,6 +289,8 @@ namespace GSynchExt
             get;
             set;
         }
+        public abstract class longitude : PX.Data.BQL.BqlDecimal.Field<longitude> { }
+
         #endregion
 
         #region MainContact

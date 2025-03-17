@@ -16,11 +16,15 @@ using PX.TM;
 using PX.SM;
 using PX.Objects.EP;
 using System.Linq;
+using PX.Objects.CS;
 
 namespace PX.Objects.PM
 {
     public class ProjectTaskEntryGSExt : PXGraphExtension<PX.Objects.PM.ProjectTaskEntry>
     {
+        #region IsActive
+        public static bool IsActive() { return PXAccess.FeatureInstalled<FeaturesSet.inventory>(); }
+        #endregion
         #region DAC Attributes Override
         [PXMergeAttributes(Method = MergeMethod.Merge)]
         [PXDefault(PMCompletedPctMethod.ByQuantity)]

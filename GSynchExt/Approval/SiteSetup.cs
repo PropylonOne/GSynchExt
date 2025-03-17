@@ -197,6 +197,7 @@ namespace GSynchExt
 		public virtual int? DfltSiteID { get; set; }
         #endregion
 
+
         #region IssueReasonCodePrefix 
         public abstract class issueReasonCodePrefix : PX.Data.BQL.BqlString.Field<issueReasonCodePrefix> { }
 
@@ -209,6 +210,17 @@ namespace GSynchExt
         }
         #endregion
 
+        #region ReceiptReasonCodePrefix 
+        public abstract class receiptReasonCodePrefix : PX.Data.BQL.BqlString.Field<receiptReasonCodePrefix> { }
+
+        [PXDBString(IsUnicode = true, InputMask = "")]
+        [PXUIField(DisplayName = "Receipt Reason Code Prefix")]
+        public virtual String ReceiptReasonCodePrefix
+        {
+            get;
+            set;
+        }
+        #endregion
 
 
     }

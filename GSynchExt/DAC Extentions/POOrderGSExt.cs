@@ -21,11 +21,16 @@ using System.Collections.Generic;
 using System;
 using PX.Objects.GL;
 using PX.Data.BQL.Fluent;
+using static PX.Objects.PO.POOrderGSExt;
 
 namespace PX.Objects.PO
 {
   public class POOrderGSExt : PXCacheExtension<PX.Objects.PO.POOrder>
   {
+        #region IsActive
+        public static bool IsActive() { return PXAccess.FeatureInstalled<FeaturesSet.inventory>(); }
+        #endregion
+
         public class FK
         {
             public class Project : PMProject.PK.ForeignKeyOf<POOrder>.By<usrProjectID> { }
@@ -69,7 +74,9 @@ namespace PX.Objects.PO
 
         public virtual int? UsrMassSubItem { get; set; }
         public abstract class usrMassSubItem : PX.Data.BQL.BqlInt.Field<usrMassSubItem> { }
-   #endregion
+        #endregion
 
-  }
+       
+
+    }
 }

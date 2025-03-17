@@ -1,26 +1,21 @@
 ﻿using System;
-using System.Linq;
 using PX.Data;
-using PX.Objects.CS;
 using PX.Objects.EP;
 using PX.Objects.AP;
 using PX.Common;
-using static PX.Data.Events;
-using PX.SM;
-using PX.Objects.PJ.Submittals.PJ.DAC;
 using PX.Objects.PM;
-using PX.Data.ReferentialIntegrity.Attributes;
-using PX.Objects.IN;
-using static PX.Data.PXGenericInqGrph;
-using static PX.Objects.IN.InventoryItem;
 using PX.Objects.GL;
-using static PX.Objects.RQ.RQRequisitionContent.FK;
+using PX.Objects.CS;
 
 
 namespace GSynchExt
 {
     public class APInvoiceEntryGSExt : PXGraphExtension<APInvoiceEntry>
     {
+        #region IsActive
+        public static bool IsActive() { return PXAccess.FeatureInstalled<FeaturesSet.inventory>(); }
+        #endregion
+
 
         #region Constants
         private string screenID = PXContext.GetScreenID();

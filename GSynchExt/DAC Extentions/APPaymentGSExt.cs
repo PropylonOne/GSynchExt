@@ -25,14 +25,17 @@ using PX.Objects.CA;
 
 namespace GSynchExt
 {
-  public class APPaymentGSExt : PXCacheExtension<APPayment>
+  public sealed class APPaymentGSExt : PXCacheExtension<APPayment>
   {
+        #region IsActive
+        public static bool IsActive() { return PXAccess.FeatureInstalled<FeaturesSet.projectModule>(); }
+        #endregion
+
         #region UsrIsPettyCash
         [PXDBBool]
         [PXUIField(DisplayName = "IsPettyCash")]
-
-        public virtual bool? UsrIsPettyCash { get; set; }
+        public bool? UsrIsPettyCash { get; set; }
         public abstract class usrIsPettyCash : PX.Data.BQL.BqlBool.Field<usrIsPettyCash> { }
         #endregion
-    }
+  }
 }

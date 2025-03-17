@@ -14,6 +14,9 @@ namespace PX.Objects.PM
 {
     public class TemplateTaskMaintGSExt : PXGraphExtension<PX.Objects.PM.TemplateTaskMaint>
     {
+        #region IsActive
+        public static bool IsActive() { return PXAccess.FeatureInstalled<FeaturesSet.inventory>(); }
+        #endregion
         #region DAC Attributes Override
         #region UsrPredecessorTaskCD
         [PXDBString(30)]

@@ -25,6 +25,12 @@ namespace PX.Objects.IN
         public static bool IsActive() { return PXAccess.FeatureInstalled<FeaturesSet.projectModule>(); }
         #endregion
 
+        #region Cache Attached
+        [PXMergeAttributes(Method = MergeMethod.Merge)]
+        [PXDefault("INISSUE")]
+        public virtual void _(Events.CacheAttached<INTran.reasonCode> e) { }
+        #endregion
+
         public PXFilter<ProjectStockFilter> projectstockitemsfilter;
 
         [PXFilterable]
@@ -39,13 +45,14 @@ namespace PX.Objects.IN
             var projectItemSelect = new PXSelectGroupBy<ProjectStock,
                 Where<ProjectStock.projectID, Equal<Current<ProjectStockFilter.contractID>>>,
                     Aggregate<GroupBy<ProjectStock.inventoryID,
-                    GroupBy<ProjectStock.companyID,
                     GroupBy<ProjectStock.projectID,
+                    GroupBy<ProjectStock.companyID,
                     GroupBy<ProjectStock.taskID,
                     GroupBy<ProjectStock.lotSerialNbr,
                     GroupBy<ProjectStock.siteID,
+                    GroupBy<ProjectStock.costCodeID,
                     GroupBy<ProjectStock.locationID,
-                    Sum<ProjectStock.totalAvailableQty>>>>>>>>>>(this.Base);
+                    Sum<ProjectStock.totalAvailableQty>>>>>>>>>>>(this.Base);
             PXDelegateResult delResult = new PXDelegateResult();
             delResult.Capacity = 202;
             delResult.IsResultFiltered = false;
@@ -353,6 +360,7 @@ namespace PX.Objects.IN
             }
         }
 
+        
         protected virtual void _(Events.FieldUpdated<INTran, INTran.projectID> e)
         {
             INTran doc = (INTran)e.Row;
@@ -361,10 +369,12 @@ namespace PX.Objects.IN
             SiteSetup sitePref = PXSelect<SiteSetup>.Select(this.Base);
             if (sitePref == null) return;
 
-            PMProject proj = PMProject.PK.Find(this.Base, doc.ProjectID);
+            PMProject proj = PMProject.PK.Find(this.Base, doc?.ProjectID);
+            if(proj == null) return;
             if(proj.NonProject == false)
             {
-                INSite site = INSite.PK.Find(Base, doc.SiteID);
+                INSite site = INSite.PK.Find(Base, doc?.SiteID);
+                if(site == null) return;
                 var sitePrefix = site.SiteCD.Substring(0, 3);
                 if (site != null)
                 {
@@ -379,7 +389,9 @@ namespace PX.Objects.IN
                     }
                 }
             }
+        
         }
+        
 
         #endregion
 

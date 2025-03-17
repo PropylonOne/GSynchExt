@@ -20,13 +20,6 @@ namespace PX.Objects
             public static ProjectStock Find(PXGraph graph, int projectID, int taskID, int siteID, int costCodeID, int locationID ) => FindBy(graph,  projectID);
         }
 
-/*        #region LineNbr
-        [PXDBIdentity(IsKey = true)]
-        [PXUIField(DisplayName = "Line Nbr2", Enabled = false)]
-        public virtual int? LineNbr { get; set; }
-        public abstract class lineNbr : PX.Data.BQL.BqlInt.Field<lineNbr> { }
-        #endregion
-*/
         #region Selected
         [PXBool]
         [PXUnboundDefault(false)]
@@ -34,6 +27,7 @@ namespace PX.Objects
         public virtual bool? Selected { get; set; }
         public abstract class selected : BqlBool.Field<selected> { }
         #endregion
+
 
         #region CompanyID
         // Acuminator disable once PX1027 ForbiddenFieldsInDacDeclaration [Justification]
@@ -48,7 +42,6 @@ namespace PX.Objects
         public abstract class qtySelected : PX.Data.BQL.BqlDecimal.Field<qtySelected> { }
         protected Decimal? _QtySelected;
         [PXQuantity]
-       // [PXDefault(TypeCode.Decimal, "0.0")]
         [PXUIField(DisplayName = "Qty. Selected")]
         public virtual Decimal? QtySelected
         {
@@ -58,9 +51,7 @@ namespace PX.Objects
         #endregion
 
         #region InventoryID
-        [PXDBInt(IsKey = true)]
-        [PXUIField(DisplayName = "Inventory ID", Enabled = false)]
-        [PXSelector(typeof(Search<InventoryItem.inventoryID>), SubstituteKey = (typeof(InventoryItem.inventoryCD)))]
+        [StockItem(DisplayName = "Inventory ID", IsKey =true)]
         public virtual int? InventoryID { get; set; }
         public abstract class inventoryID : PX.Data.BQL.BqlInt.Field<inventoryID> { }
         #endregion
@@ -76,7 +67,7 @@ namespace PX.Objects
         [PXDBInt(IsKey = true)]
         [PXUIField(DisplayName = "Project ID", Enabled = false)]
         [PXSelector(typeof(Search<PMProject.contractID, Where<PMProject.nonProject, Equal<False>, And<PMProject.baseType, Equal<CTPRType.project>>>>),
-            SubstituteKey = (typeof(PMProject.contractCD)))]
+        SubstituteKey = (typeof(PMProject.contractCD)))]
         public virtual int? ProjectID { get; set; }
         public abstract class projectID : PX.Data.BQL.BqlInt.Field<projectID> { }
         #endregion
@@ -86,13 +77,6 @@ namespace PX.Objects
         [PXUIField(DisplayName = "Task ID", Enabled = false)]
         public virtual int? TaskID { get; set; }
         public abstract class taskID : PX.Data.BQL.BqlInt.Field<taskID> { }
-        #endregion
-
-        #region Descr
-        [PXDBString(256, IsUnicode = true, InputMask = "")]
-        [PXUIField(DisplayName = "Descr", Enabled = false)]
-        public virtual string Descr { get; set; }
-        public abstract class descr : PX.Data.BQL.BqlString.Field<descr> { }
         #endregion
 
         #region SiteID
@@ -119,7 +103,7 @@ namespace PX.Objects
         #endregion
 
         #region LotSerialNbr
-        [PXDBString(100, IsUnicode = true, InputMask = "")]
+        [PXDBString(100, IsUnicode = true, InputMask = "", IsKey = true)]
         [PXUIField(DisplayName = "Lot Serial Nbr", Enabled = false)]
         public virtual string LotSerialNbr { get; set; }
         public abstract class lotSerialNbr : PX.Data.BQL.BqlString.Field<lotSerialNbr> { }
