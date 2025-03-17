@@ -76,5 +76,6 @@ namespace GSynchExt
         public virtual string ComTaskCD2 { get; set; }
         public abstract class comTaskCD2 : PX.Data.BQL.BqlString.Field<comTaskCD2> { }
         #endregion
+
   }
 }
