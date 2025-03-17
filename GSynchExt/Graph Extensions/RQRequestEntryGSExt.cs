@@ -36,8 +36,12 @@ using PX.Objects.CT;
 
 namespace PX.Objects.RQ
 {
-    public class RQRequestEntryGSExt : PXGraphExtension<RQRequestEntry>
-    {
+	public class RQRequestEntryGSExt : PXGraphExtension<RQRequestEntry>
+	{
+		#region IsActive
+		public static bool IsActive() { return PXAccess.FeatureInstalled<FeaturesSet.inventory>(); }
+		#endregion
+
 		#region filter
 		[System.SerializableAttribute()]
 		[PXCacheName("BOQ Items Filter")]
@@ -50,7 +54,7 @@ namespace PX.Objects.RQ
 			[PXSelector(typeof(Search2<Contract.contractID,
 			InnerJoin<GSBOQ,
 				On<Contract.contractID, Equal<GSBOQ.bOQID>,
-					And<GSBOQ.status, Equal<BOQStatus.active>>>>>), 
+					And<GSBOQ.status, Equal<BOQStatus.active>>>>>),
 				typeof(Contract.contractCD), typeof(Contract.description), typeof(Contract.status),
 				SubstituteKey = (typeof(Contract.contractCD)))]
 			public virtual Int32? BOQID
@@ -76,7 +80,7 @@ namespace PX.Objects.RQ
 			public abstract class isCapType1 : PX.Data.BQL.BqlBool.Field<isCapType1> { }
 			[PXUIField(DisplayName = "Capacity Type 1")]
 			[PXBool()]
-			public virtual bool IsCapType1
+			public virtual bool? IsCapType1
 			{
 				get;
 				set;
@@ -131,7 +135,7 @@ namespace PX.Objects.RQ
 
 			if (boqitemsfilter.Current.CapacityType1 != null)
 			{
-				
+
 			}
 
 			PXDelegateResult delResult = new PXDelegateResult();
@@ -149,12 +153,20 @@ namespace PX.Objects.RQ
 			foreach (GSBOQMatl boqResult in resultset)
 			{
 				GSBOQMatl boqItems = boqResult;
-			    delResult.Add(boqItems);
+				delResult.Add(boqItems);
 			}
 
 			return delResult;
 		}
 		#endregion
+
+		/*#region Cache Attached
+		[PXMergeAttributes(Method = MergeMethod.Replace)]
+		[PXDBQuantity(typeof(RQRequestLine.uOM), typeof(RQRequestLine.baseOrderQty), HandleEmptyKey = true)]
+		[PXDefault(TypeCode.Decimal, "0.0")]
+		[PXUIField(DisplayName = "Request Quantity", Visible = true, Enabled = true)]
+		public virtual void _(Events.CacheAttached<RQRequestLine.orderQty> e) { }
+		#endregion*/
 
 		public PXAction<RQRequest> addBOQItems;
 		[PXUIField(DisplayName = "Add BOQ Items", MapEnableRights = PXCacheRights.Select, MapViewRights = PXCacheRights.Select)]
@@ -197,7 +209,7 @@ namespace PX.Objects.RQ
 				foreach (GSBOQMatl line in BoqItems.Cache.Cached)
 				{
 					if (line.Selected == true)
-					{ 
+					{
 						RQRequestLine newline = new RQRequestLine();
 						newline.InventoryID = line.InventoryID;
 						newline.OrderQty = line.EstQtyPhase;
@@ -215,48 +227,63 @@ namespace PX.Objects.RQ
 		}
 
 		public PXAction<RQRequest> MassUpdateSub;
-        [PXButton(CommitChanges = true)]
-        [PXUIField(DisplayName = "Mass Update Sub Acc", Enabled = false)]
-        protected virtual IEnumerable massUpdateSub(PXAdapter adapter)
+		[PXButton(CommitChanges = true)]
+		[PXUIField(DisplayName = "Mass Update Sub Acc", Enabled = false)]
+		protected virtual IEnumerable massUpdateSub(PXAdapter adapter)
+		{
+			var currentRequest = Base.Document.Current;
+			var currentRequestExt = currentRequest.GetExtension<RQRequestGSExt>();
+			if (currentRequestExt.UsrMassSubItem == null || currentRequestExt.UsrMassSubItem == 0)
+				return adapter.Get(); ;
+			foreach (RQRequestLine item in Base.Lines.Select())
+			{
+				item.ExpenseSubID = currentRequestExt.UsrMassSubItem;
+				Base.Lines.Current = item;
+				Base.Lines.Update(Base.Lines.Current);
+
+			}
+			Base.Save.Press();
+			return adapter.Get();
+		}
+
+
+		public virtual RQRequest CreateEmptyRequestFrom(GSBOQ boq)
+		{
+			RQRequest boqReq = this.Base.Document.Insert();
+
+			return boqReq;
+		}
+
+		public virtual RQRequest CreateRequestFromBOQ(GSBOQ boq, bool redirect = false)
+		{
+
+			CreateEmptyRequestFrom(boq);
+
+			if (this.Base.CurrentDocument.Cache.IsDirty)
+			{
+				if (redirect)
+					throw new PXRedirectRequiredException(this.Base, "");
+				else
+					return this.Base.CurrentDocument.Current;
+			}
+
+			throw new PXException(GSynchExt.Messages.NORequestCreated);
+		}
+
+        #region Event Handlers
+      /*  protected void _(Events.FieldUpdated<RQRequestLine, RQRequestLineGSExt.usrTransQty> e)
         {
-            var currentRequest = Base.Document.Current;
-            var currentRequestExt = currentRequest.GetExtension<RQRequestGSExt>();
-            if (currentRequestExt.UsrMassSubItem == null || currentRequestExt.UsrMassSubItem == 0)
-                return adapter.Get(); ;
-            foreach (RQRequestLine item in Base.Lines.Select())
+            var row = e.Row;
+            if (row != null)
             {
-                item.ExpenseSubID = currentRequestExt.UsrMassSubItem;
-                Base.Lines.Current = item;
-                Base.Lines.Update(Base.Lines.Current);
-
+                var ext = e.Cache.GetExtension<RQRequestLineGSExt>(row);
+                if (ext != null)
+                {
+                    ext.UsrOrderQty = (row.ReqQty ?? 0) - (ext.UsrTransQty ?? 0);
+                    e.Cache.Update(row);
+                }
             }
-            Base.Save.Press();
-            return adapter.Get();
-        }
-
-
-        public virtual RQRequest CreateEmptyRequestFrom(GSBOQ boq)
-        {
-            RQRequest boqReq = this.Base.Document.Insert();
-
-            return boqReq;
-        }
-
-        public virtual RQRequest CreateRequestFromBOQ(GSBOQ boq, bool redirect = false)
-        {
-
-            CreateEmptyRequestFrom(boq);
-
-            if (this.Base.CurrentDocument.Cache.IsDirty)
-            {
-                if (redirect)
-                    throw new PXRedirectRequiredException(this.Base, "");
-                else
-                    return this.Base.CurrentDocument.Current;
-            }
-
-            throw new PXException("");
-        }
-
+        }*/
+        #endregion
     }
 }

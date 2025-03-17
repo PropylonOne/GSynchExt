@@ -35,6 +35,9 @@ namespace PX.Objects.RQ
 {
     public class RQRequisitionEntryGSExt : PXGraphExtension<RQRequisitionEntry>
     {
+        #region IsActive
+        public static bool IsActive() { return PXAccess.FeatureInstalled<FeaturesSet.inventory>(); }
+        #endregion
 
         PXSelect<AttrView> attrView;
 

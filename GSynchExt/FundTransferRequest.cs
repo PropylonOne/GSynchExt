@@ -25,9 +25,9 @@ namespace GSynchExt
 
 
 
-
+         
     #region ReqNbr
-    [PXDBString(10, IsKey = true, IsUnicode = true, InputMask = "")]
+    [PXDBString(15, IsKey = true, IsUnicode = true, InputMask = "")]
     [PXUIField(DisplayName = "Req Nbr")]
     [PXSelector(typeof(Search<FundTransferRequest.reqNbr>), typeof(FundTransferRequest.reqNbr), typeof(FundTransferRequest.description), typeof(FundTransferRequest.status))]
 

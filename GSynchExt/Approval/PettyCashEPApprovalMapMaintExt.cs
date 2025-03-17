@@ -1,4 +1,5 @@
 ﻿using PX.Data;
+using PX.Objects.CS;
 using PX.Objects.EP;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,10 @@ namespace GSynchExt
 {
     public class PettyCashEPApprovalMapMaintExtension : PXGraphExtension<EPApprovalMapMaint>
     {
+        #region IsActive
+        public static bool IsActive() { return PXAccess.FeatureInstalled<FeaturesSet.inventory>(); }
+        #endregion
+
         #region Overrides
 
         public delegate IEnumerable<string> GetEntityTypeScreensDel();

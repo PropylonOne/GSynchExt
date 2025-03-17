@@ -25,8 +25,11 @@ using PX.Objects.GL;
 
 namespace PX.Objects.RQ
 {
-  public class RQRequestGSExt : PXCacheExtension<PX.Objects.RQ.RQRequest>
+  public sealed class RQRequestGSExt : PXCacheExtension<PX.Objects.RQ.RQRequest>
   {
+        #region IsActive
+        public static bool IsActive() { return PXAccess.FeatureInstalled<FeaturesSet.inventory>(); }
+        #endregion
 
         public class FK
         {
@@ -42,7 +45,7 @@ namespace PX.Objects.RQ
         [PXDBInt]
         [PXUIField(DisplayName = "Project Ref.")]
         [PXSelector(typeof(Search<PMProject.contractID>), SubstituteKey = (typeof(PMProject.contractCD)))]
-        public virtual Int32? UsrProjectID
+        public Int32? UsrProjectID
         {
             get
             {
@@ -68,7 +71,7 @@ namespace PX.Objects.RQ
             DescriptionField = typeof(Sub.description)
             )]
 
-        public virtual int? UsrMassSubItem { get; set; }
+        public int? UsrMassSubItem { get; set; }
         public abstract class usrMassSubItem : PX.Data.BQL.BqlInt.Field<usrMassSubItem> { }
         #endregion
   }

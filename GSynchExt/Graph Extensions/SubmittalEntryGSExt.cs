@@ -22,11 +22,15 @@ using PX.Objects;
 using GSynchExt;
 using PX.Objects.RQ;
 using PX.Objects.PM;
+using PX.Objects.CS;
 
 namespace PX.Objects.PJ.Submittals.PJ.Graphs
 {
     public class SubmittalEntryGSExt : PXGraphExtension<PX.Objects.PJ.Submittals.PJ.Graphs.SubmittalEntry>
     {
+        #region IsActive
+        public static bool IsActive() { return PXAccess.FeatureInstalled<FeaturesSet.inventory>(); }
+        #endregion
         public virtual PJSubmittal CreateSubmittal(PMCostBudget budget)
         {
             PJSubmittal submRec = this.Base.Submittals.Insert();

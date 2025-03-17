@@ -21,11 +21,9 @@ using static PX.Objects.IN.ItemClassTree.INItemClass;
 namespace GSynchExt
 {
 	[Serializable]
-	[PXCacheName("FundTransferRequestPreference")]
+	[PXCacheName("Transfer Request Preference")]
 	public class FundTransferRequestSetup : PXBqlTable, IBqlTable
-
     {
-
         #region FTRequestNumberingID
         [PXDBString(10, IsUnicode = true, InputMask = "")]
         [PXUIField(DisplayName = "Fund Transfer Request Numbering Sequence")]
@@ -44,6 +42,15 @@ namespace GSynchExt
         public abstract class mTRequestNumberingID : PX.Data.BQL.BqlString.Field<mTRequestNumberingID> { }
         #endregion
 
+        #region FARequestNumberingID
+        [PXDBString(10, IsUnicode = true, InputMask = "")]
+        [PXUIField(DisplayName = "FA Request Numbering Sequence")]
+        [PXDefault("FAREQUEST")]
+        [PXSelector(typeof(Numbering.numberingID), DescriptionField = typeof(Numbering.descr))]
+        public virtual string FARequestNumberingID { get; set; }
+        public abstract class fARequestNumberingID : PX.Data.BQL.BqlString.Field<fARequestNumberingID> { }
+        #endregion
+
 
         #region SMRequestNumberingID
         [PXDBString(10, IsUnicode = true, InputMask = "")]
@@ -54,14 +61,25 @@ namespace GSynchExt
         public abstract class sMRequestNumberingID : PX.Data.BQL.BqlString.Field<sMRequestNumberingID> { }
         #endregion
 
+        #region FTRequestapprovalMap
         public abstract class approvalMap : BqlBool.Field<approvalMap>
         {
         }
         [EPRequireApproval]
         [PXDefault(false, PersistingCheck = PXPersistingCheck.Null)]
-        [PXUIField(DisplayName = "Require Approval")]
+        [PXUIField(DisplayName = "Require Approval For Fund Transfer Request")]
         public virtual bool? ApprovalMap { get; set; }
+        #endregion
 
 
+        #region FARequestapprovalMap
+
+        [EPRequireApproval]
+        [PXDefault(false, PersistingCheck = PXPersistingCheck.Null)]
+        [PXUIField(DisplayName = "Require Approval For FA Request")]
+        public virtual bool? FARequestapprovalMap { get; set; }
+        public abstract class fARequestapprovalMap : BqlBool.Field<fARequestapprovalMap> { }
+        #endregion
     }
 }
+

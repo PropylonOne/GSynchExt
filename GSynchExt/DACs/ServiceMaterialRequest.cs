@@ -36,7 +36,7 @@ namespace GSynchExt
         #endregion
 
         #region ReqNbr
-        [PXDBString(10, IsKey = true, IsUnicode = true, InputMask = "")]
+        [PXDBString(15, IsKey = true, IsUnicode = true, InputMask = "")]
         [PXUIField(DisplayName = "Req Nbr")]
         [PXSelector(typeof(Search<ServiceMaterialRequest.reqNbr>), typeof(ServiceMaterialRequest.reqNbr))]
         [AutoNumber(typeof(FundTransferRequestSetup.sMRequestNumberingID), typeof(ServiceMaterialRequest.createdDateTime))]

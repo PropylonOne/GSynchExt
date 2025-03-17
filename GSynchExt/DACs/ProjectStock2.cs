@@ -1,9 +1,7 @@
 using System;
-using GSynchExt;
 using PX.Data;
 using PX.Data.BQL;
 using PX.Data.ReferentialIntegrity.Attributes;
-using PX.Data.Update;
 using PX.Objects.CT;
 using PX.Objects.IN;
 using PX.Objects.PM;
@@ -19,14 +17,6 @@ namespace PX.Objects
         {
             public static ProjectStock Find(PXGraph graph, int projectID, int taskID, int siteID, int costCodeID, int locationID ) => FindBy(graph,  projectID);
         }
-
-/*        #region LineNbr
-        [PXDBIdentity(IsKey = true)]
-        [PXUIField(DisplayName = "Line Nbr2", Enabled = false)]
-        public virtual int? LineNbr { get; set; }
-        public abstract class lineNbr : PX.Data.BQL.BqlInt.Field<lineNbr> { }
-        #endregion
-*/
         #region Selected
         [PXBool]
         [PXUnboundDefault(false)]

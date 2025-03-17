@@ -9,6 +9,9 @@ namespace PX.Objects.PM
 {
     public class ProjectBalanceMaintGSExt : PXGraphExtension<ProjectBalanceMaint>
     {
+        #region IsActive
+        public static bool IsActive() { return PXAccess.FeatureInstalled<FeaturesSet.inventory>(); }
+        #endregion
         #region DAC Attributes Override
 
         #endregion

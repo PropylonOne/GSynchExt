@@ -1,38 +1,29 @@
 ﻿using GSynchExt;
 using PX.Data;
-using PX.Data.ReferentialIntegrity.Attributes;
-using PX.Data.BQL;
 using PX.Objects.AP;
-using PX.Objects.AR.CCPaymentProcessing.Common;
-using PX.Objects.AR.CCPaymentProcessing.Helpers;
 using PX.Objects.CN.Common.Helpers;
 using PX.Objects.CN.ProjectAccounting.PM.Descriptor;
+using PX.Objects.CS;
 using PX.Objects.CT;
-using PX.Objects.FA;
 using PX.Objects.GL;
 using PX.Objects.PJ.DailyFieldReports.PJ.Graphs;
 using PX.Objects.PJ.ProjectManagement.PJ.DAC;
 using PX.Objects.PJ.Submittals.PJ.Graphs;
-using PX.Objects.PM;
-using PX.Objects.TX;
 using PX.SM;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using static GSynchExt.APInvoiceEntryGSExt;
-using static PX.Data.PXAccess;
-using static PX.Data.PXGenericInqGrph;
-using static PX.Objects.CS.TermsDueType;
-using static PX.Objects.CT.ContractAction;
-using static PX.Objects.IN.InventoryItem;
-using System.Threading.Tasks;
-using static PX.SM.EMailAccount;
 
 namespace PX.Objects.PM
 {
     public class ProjectEntryGSExt : PXGraphExtension<ProjectEntry>
     {
+        #region IsActive
+        public static bool IsActive() { return PXAccess.FeatureInstalled<FeaturesSet.inventory>(); }
+        #endregion
+
         #region DAC Attributes Override
         [PXMergeAttributes(Method = MergeMethod.Merge)]
         [PXDefault(BudgetLevels.Detail)]
@@ -170,7 +161,7 @@ namespace PX.Objects.PM
             if (row == null) return;
 
             var task = PXSelect<
-                PMTask, 
+                PMTask,
                 Where<PMTask.projectID, Equal<Required<PMTask.projectID>>>>
                 .Select(this.Base, row.ContractID);
             if (task == null) return;
@@ -184,7 +175,7 @@ namespace PX.Objects.PM
                 tasksExt.UsrPredecessorTaskCD = null;
                 this.Base.Actions.PressSave();
             }
-            var projSite = row.ContractCD;   
+            var projSite = row.ContractCD;
             ssgraph.Site.Current = SolarSite.UK.Find(ssgraph, projSite);
             var ssRec = ssgraph.Site.Current;
             if (ssRec != null)
@@ -193,10 +184,10 @@ namespace PX.Objects.PM
                 ssgraph.Site.Update(ssRec);
 
                 SolarSiteSurvey survey = PXSelect<
-                    SolarSiteSurvey, 
+                    SolarSiteSurvey,
                     Where<SolarSiteSurvey.solarSiteID, Equal<Required<SolarSiteSurvey.solarSiteID>>>>
                     .Select(this.Base, ssRec.SolarSiteID);
-                if(survey == null)
+                if (survey == null)
                 {
                     ssRec.SiteStatus = Status.Planned;
                 }
@@ -266,16 +257,27 @@ namespace PX.Objects.PM
             }
         }
 
+        protected virtual void _(Events.FieldUpdated<PMTask, PMTask.endDate> e)
+        {
+            var row = e.Row;
+            if (row == null) return;
+            SiteSetup sitePref = PXSelect<SiteSetup>.Select(this.Base);
+            if (sitePref == null) return;
+            DateTime? oldval = (DateTime?)e.OldValue ;
+            DateTime? newval = (DateTime?)e.NewValue;
 
+            GSProjectHelper.ProcessTaskEndDateUpdate(oldval, newval, sitePref, row, this.Base);
+            
+        }
         protected virtual void _(Events.FieldUpdated<Contract, ContractGSExt.usrAreaEngineer> e)
         {
             e.Cache.SetDefaultExt<ContractGSExt.usrAreaEngApprover>(e.Row);
         }
-         
+
         protected virtual void _(Events.FieldDefaulting<Contract, ContractGSExt.usrAreaEngApprover> e)
         {
             PX.Objects.CR.Standalone.EPEmployee owner = PXSelect<
-                PX.Objects.CR.Standalone.EPEmployee, 
+                PX.Objects.CR.Standalone.EPEmployee,
                 Where<PX.Objects.CR.Standalone.EPEmployee.defContactID, Equal<Current<ContractGSExt.usrAreaEngineer>>>>
                 .Select(this.Base);
             if (owner != null)
@@ -316,7 +318,7 @@ namespace PX.Objects.PM
                     rowExt.UsrPredecessorTaskID = scrTask?.TaskID;
                     rowExt.UsrPredecessorTaskCD = scrTask?.TaskCD;
 
-                    if(scrTask?.EndDate != null || scrTask?.PlannedEndDate != null)
+                    if (scrTask?.EndDate != null || scrTask?.PlannedEndDate != null)
                     {
                         var planStart = DateTimeHelper.CalculateBusinessDate((DateTime)(scrTask?.EndDate ?? scrTask?.PlannedEndDate), 1, pmSetup.CalendarId);
 
@@ -325,7 +327,7 @@ namespace PX.Objects.PM
                             row.PlannedStartDate = planStart;
                             row.PlannedEndDate = DateTimeHelper.CalculateBusinessDate((DateTime)row.PlannedStartDate, rowExt.UsrLeadDays ?? 0, pmSetup.CalendarId);
                         }
-                    }                  
+                    }
                 }
             }
         }
@@ -338,7 +340,7 @@ namespace PX.Objects.PM
             var IsExists = false;
 
             var task = PXSelect<
-                PMTask, 
+                PMTask,
                 Where<PMTask.projectID, Equal<Required<PMTask.projectID>>>>
                 .Select(this.Base, row.ProjectID);
             if (task == null) return;
@@ -372,12 +374,12 @@ namespace PX.Objects.PM
             if (row == null) return adapter.Get();
 
             PMTask task = PXSelect<
-                PMTask, 
+                PMTask,
                 Where<PMTask.taskID,
                                         Equal<Required<PMTask.taskID>>>>
                 .Select(this.Base, row.TaskID);
 
-            if(task.Status != ProjectTaskStatus.Active || row.AccountGroupID != 17 )
+            if (task.Status != ProjectTaskStatus.Active || row.AccountGroupID != 17)
             {
                 throw new PXException(GSynchExt.Messages.CreateAPBillError);
             }
@@ -391,7 +393,7 @@ namespace PX.Objects.PM
             if (ViewName == "Dialog") createAPBill.SetEnabled(true);
         }
 
-         public PXAction<PMCostBudget> createAPBill;
+        public PXAction<PMCostBudget> createAPBill;
         [PXButton]
         [PXUIField(DisplayName = "Create Bill", Enabled = true)]
         protected virtual IEnumerable CreateAPBill(PXAdapter adapter)
@@ -434,7 +436,7 @@ namespace PX.Objects.PM
                             ///Check against the predecessor tasks end date
                             var preTask = PMTask.UK.Find(this.Base, rec.ProjectID, recExt.UsrPredecessorTaskCD);
                             if (preTask != null)
-                            { 
+                            {
                                 recExt.UsrPredecessorTaskID = preTask.TaskID;
                                 var planStart = DateTimeHelper.CalculateBusinessDate((DateTime)(preTask.EndDate ?? preTask.PlannedEndDate), 1, pmSetup.CalendarId);
                                 rec.PlannedStartDate = planStart;
@@ -562,7 +564,7 @@ namespace PX.Objects.PM
                 sub = GSProjectHelper.CreateSubaccount(this.Base, prj);
             }
             var prjTasks = PXSelect<
-                PMTask, 
+                PMTask,
                 Where<PMTask.projectID, Equal<Current<PMProject.contractID>>>>
                 .Select(this.Base);
             ProjectManagementSetup pmSetup = (ProjectManagementSetup)PXSelect<ProjectManagementSetup>.Select(this.Base);
@@ -572,7 +574,7 @@ namespace PX.Objects.PM
             {
                 PMTask dst = (PMTask)res;
                 var scr = (PMTask)PXSelect<
-                    PMTask, 
+                    PMTask,
                     Where<PMTask.taskCD, Equal<Required<PMTask.taskCD>>,
                         And<PMTask.projectID, Equal<Required<PMTask.projectID>>>>>
                     .Select(this.Base, dst.TaskCD, templ.ContractID);

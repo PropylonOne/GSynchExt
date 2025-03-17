@@ -1,4 +1,5 @@
 ﻿using PX.Data;
+using PX.Objects.CS;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,9 @@ namespace PX.Objects.RQ
 {
     public class RQBiddingEntryGSExt : PXGraphExtension<RQBiddingEntry>
     {
+        #region IsActive
+        public static bool IsActive() { return PXAccess.FeatureInstalled<FeaturesSet.inventory>(); }
+        #endregion
         protected virtual void _(Events.RowSelected<RQRequisitionLineBidding> e)
         {
             var row = e.Row as RQRequisitionLineBidding;

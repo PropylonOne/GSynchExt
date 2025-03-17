@@ -17,8 +17,12 @@ namespace PX.Objects.PM
 {
   public class PMBudgetGSExt : PXCacheExtension<PX.Objects.PM.PMBudget>
   {
-    #region UsrVendorID
-    [PXInt]
+        #region IsActive
+        public static bool IsActive() { return PXAccess.FeatureInstalled<FeaturesSet.inventory>(); }
+        #endregion
+
+        #region UsrVendorID
+        [PXInt]
     [PXSelector(typeof(Search<BAccount.bAccountID>), SubstituteKey =typeof(BAccount.acctName))]
     [PXUIField(DisplayName="Vendor ID")]
     public virtual int? UsrVendorID { get; set; }

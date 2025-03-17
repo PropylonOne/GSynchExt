@@ -25,6 +25,9 @@ namespace PX.Objects.PM
     /// </summary>
     public class ProgressWorksheetEntryGSExt : PXGraphExtension<PX.Objects.PM.ProgressWorksheetEntry>
     {
+        #region IsActive
+        public static bool IsActive() { return PXAccess.FeatureInstalled<FeaturesSet.inventory>(); }
+        #endregion
 
         #region DAC Attributes Override
         [PXMergeAttributes(Method = MergeMethod.Merge)]

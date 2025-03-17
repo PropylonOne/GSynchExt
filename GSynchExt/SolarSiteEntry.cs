@@ -564,6 +564,16 @@ namespace GSynchExt
 
         #region EventHandlers
 
+        protected virtual void _(Events.FieldUpdated<SolarSite.siteCapacity> e)
+        {
+            var row = e.Row as SolarSite;
+            if(row == null)return;
+            if (e.NewValue == null || row.SiteCapacity == 0) return;
+            Phase phase = Phase.PK.Find(this, row.Province, row.PhaseID);
+            if (phase == null) return;
+            row.EstSiteValue = row.SiteCapacity * phase?.EstimatedCost;
+            
+        }
         protected virtual void _(Events.RowSelected<SolarSite> e)
         {
             SolarSite doc = (SolarSite)e.Row;
@@ -625,24 +635,6 @@ namespace GSynchExt
             */
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         public virtual void AddingTasksToProject(SolarSite row, ProjectEntry projectEntry, Dictionary<string, int> taskMap, bool? copyNotes, bool? copyFiles)
         {
             var resultset = PXSelect<PMTask, Where<PMTask.projectID, Equal<Required<PMTask.projectID>>>>.Select(projectEntry, row.TemplateID);
@@ -660,27 +652,6 @@ namespace GSynchExt
 
             }
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
         #endregion
 

@@ -118,6 +118,15 @@ namespace GSynchExt
         public abstract class actQty : PX.Data.BQL.BqlDecimal.Field<actQty> { }
         #endregion
 
+        #region CebQty
+        [PXDBQuantity()]
+        [PXDefault(TypeCode.Decimal, "0.0")]
+        [PXUIField(DisplayName = "CEB Qty")]
+        public virtual decimal? CebQty { get; set; }
+        public abstract class cebQty : PX.Data.BQL.BqlDecimal.Field<cebQty> { }
+        #endregion
+
+
         #region SiteBillAmount
         [PXDBBaseCury]
         [PXDefault(TypeCode.Decimal, "0.0")]

@@ -26,6 +26,9 @@ namespace PX.Objects.FS
 {
   public class ServiceOrderEntryGSExt : PXGraphExtension<ServiceOrderEntry>
   {
+        #region IsActive
+        public static bool IsActive() { return PXAccess.FeatureInstalled<FeaturesSet.inventory>(); }
+        #endregion
 
         [PXMergeAttributes(Method = MergeMethod.Replace)]
         [PXDBInt]

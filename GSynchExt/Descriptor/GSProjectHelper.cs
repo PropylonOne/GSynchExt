@@ -14,7 +14,6 @@ using PX.TM;
 using System;
 using System.Linq;
 using static GSynchExt.SolarSiteEntry;
-using static PX.Objects.GL.Reclassification.UI.ReclassifyTransactionsProcess.ReplaceOptions;
 /// <summary>
 /// A utility class that to assist Projects, Solar Sites & Tasks related actions
 /// Completion of KEY Milestone tasks
@@ -317,6 +316,7 @@ namespace PX.Objects.PM
                                 if (task == sitePref.MapConsEnd)
                                 {
                                     GSProjectHelper.UpdateSolarSiteCompletionDate(proj?.ContractCD, (DateTime)graph.Accessinfo.BusinessDate);
+                                    
                                 }
                                 if (task == sitePref.MapCommissioned)
                                 {
@@ -365,6 +365,69 @@ namespace PX.Objects.PM
             catch (Exception e)
             {
                 throw new PXException(GSynchExt.Messages.StatusUpdateError, e.Message.Trim());
+            }
+        }
+
+        public static void ProcessTaskEndDateUpdate(DateTime? oldval, DateTime? newval, SiteSetup sitePref, PMTask row, PXGraph graph)
+        {
+            try
+            {
+                if (oldval != newval)
+                {
+                    var proj = PMProject.PK.Find(graph, row.ProjectID);
+                    if (proj == null) return;
+                    if (row.Status == ProjectTaskStatus.Completed)
+                    {
+                        if (sitePref != null)
+                        {
+                            if (row.TaskCD.Length > 3)
+                            {
+                                var task = row.TaskCD.Remove(0, 3) ?? "XXX";
+                                task = task.TrimEnd();
+
+                                SolarSiteEntry ssgraph = PXGraph.CreateInstance<SolarSiteEntry>();
+                                ssgraph.Site.Current = SolarSite.UK.Find(ssgraph, proj.ContractCD);
+                                var ssRec = ssgraph.Site.Current;
+                                if (ssRec == null) return;
+
+                                if (task == sitePref.MapConsStart)
+                                {
+                                    ssRec.ConstructionStartDate = newval;
+                                    ssgraph.Site.Update(ssRec);
+                                    ssgraph.Actions.PressSave();
+                                }
+                                if (task == sitePref.MapConsEnd)
+                                {
+                                    ssRec.ConstructionEndDate = newval;
+                                    ssgraph.Site.Update(ssRec);
+                                    ssgraph.Actions.PressSave();
+                                }
+                                if (task == sitePref.MapCommissioned)
+                                {
+                                    ssRec.CommissionedDate = newval;
+                                    ssgraph.Site.Update(ssRec);
+                                    ssgraph.Actions.PressSave();
+                                }
+                                if (task == sitePref.MapConnectedToGrid)
+                                {
+                                    ssRec.ConnectedtoGridDate = newval;
+                                    ssgraph.Site.Update(ssRec);
+                                    ssgraph.Actions.PressSave();
+                                }
+                                if (task == sitePref.MapReleasedToServices)
+                                {
+                                    ssRec.InServiceDate = newval;
+                                    ssgraph.Site.Update(ssRec);
+                                    ssgraph.Actions.PressSave();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                throw new PXException(GSynchExt.Messages.EndDateUpdateError, e.Message.Trim());
             }
         }
 
@@ -638,12 +701,12 @@ namespace PX.Objects.PM
                         }
                         if (newStatus == ProjectTaskStatus.Completed && (oldStatus == ProjectTaskStatus.Active || oldStatus == ProjectTaskStatus.Planned))
                         {
-                            if ((isConsStart || isConsEnd || isCommissioned || isConnectedToGrid || isReleasedToServices)  && (sSite.SiteCapacity == decimal.Zero || sSite.SiteCapacity == null || sSite.EstSiteValue == decimal.Zero || sSite.EstSiteValue == null))
+                            if ((isConsStart || isConsEnd || isCommissioned || isConnectedToGrid || isReleasedToServices) && (sSite.SiteCapacity == decimal.Zero || sSite.SiteCapacity == null || sSite.EstSiteValue == decimal.Zero || sSite.EstSiteValue == null))
                             {
                                 throw new PXException(GSynchExt.Messages.CheckNullsForTaskStatusUpdate);
                             }
                         }
-                        if (newStatus == ProjectTaskStatus.Canceled && (oldStatus == ProjectTaskStatus.Active || oldStatus == ProjectTaskStatus.Planned ||  oldStatus == ProjectTaskStatus.Completed))
+                        if (newStatus == ProjectTaskStatus.Canceled && (oldStatus == ProjectTaskStatus.Active || oldStatus == ProjectTaskStatus.Planned || oldStatus == ProjectTaskStatus.Completed))
                         {
                             if (isConsStart || isConsEnd || isCommissioned || isConnectedToGrid || isReleasedToServices)
                             {

@@ -65,9 +65,9 @@ namespace GSynchExt
                     return Survey.Current;
             }
 
-            throw new PXException("");
+            throw new PXException(Messages.NOSurveyCreated);
         }
-
+           
 
         /*
                 public PXAction<SolarSiteSurvey> Archive;

@@ -1,32 +1,22 @@
 using PX.Data;
-using PX.Data.BQL;
-using PX.Data.BQL.Fluent;
-using PX.Objects.CN.Common.Extensions;
-using PX.Objects.PJ.Common.DAC;
-using PX.Objects.PJ.Submittals.PJ.DAC;
-using PX.Objects.CR;
 using System;
 using System.Collections;
-using System.Linq;
-using StatusDefinition = PX.Objects.PJ.Submittals.PJ.DAC.PJSubmittal.status;
 using System.Collections.Generic;
-using PX.Objects.Common.Labels;
-using PX.Objects;
 using GSynchExt;
-using PX.Objects.RQ;
 using PX.Objects.PM;
-using static GSynchExt.GSBOQMaint;
 using PX.Objects.CS;
-using PX.Objects.CA;
-using static PX.Objects.RQ.RQRequestEntryGSExt;
-using static PX.Objects.TX.CSTaxCalcType;
-using PX.Data.Update;
+using System.Linq;
+using PX.Objects.AM;
+
+using static PX.Objects.PM.AccountGroupMaint;
 
 namespace PX.Objects.IN
 {
     public class INTransferEntryGSExt : PXGraphExtension<INTransferEntry>
     {
-
+        #region IsActive
+        public static bool IsActive() { return PXAccess.FeatureInstalled<FeaturesSet.inventory>(); }
+        #endregion
 
         public PXFilter<ProjectStockFilter> projectstockitemsfilter;
 
@@ -36,10 +26,6 @@ namespace PX.Objects.IN
         public PXSelect<ProjectStock, Where<ProjectStock.projectID, Equal<Current<ProjectStockFilter.contractID>>,
             And<ProjectStock.siteID,
                         Equal<Current<INRegister.siteID>>>>> ProjectStockItems;
-
-
-      // public PXSelect<ProjectStockProjected> ProjectStockItems2;
-
         public IEnumerable projectstockitems()
         {
             List<object> parameters = new List<object>();
@@ -52,7 +38,8 @@ namespace PX.Objects.IN
                      GroupBy<ProjectStock.taskID,
                      GroupBy<ProjectStock.lotSerialNbr,
                      GroupBy<ProjectStock.siteID,
-                     GroupBy<ProjectStock.locationID, Sum<ProjectStock.totalAvailableQty>>>>>>>>>>(this.Base);
+                     GroupBy<ProjectStock.costCodeID,
+                     GroupBy<ProjectStock.locationID, Sum<ProjectStock.totalAvailableQty>>>>>>>>>>>(this.Base);
             PXDelegateResult delResult = new PXDelegateResult();
             delResult.Capacity = 202;
             delResult.IsResultFiltered = false;
@@ -75,7 +62,7 @@ namespace PX.Objects.IN
 
                     PMTask task = PXSelect<PMTask, Where<PMTask.taskID, Equal<Required<PMTask.taskID>>>>.Select(this.Base, projectItem.TaskID);
 
-                    if (projectItem.TotalAvailableQty > 0 &&  task.Status == ProjectTaskStatus.Active)
+                    if (projectItem.TotalAvailableQty > 0 && task.Status == ProjectTaskStatus.Active)
                     {
 
                         projectItem.QtySelected = projectItem.TotalAvailableQty;
@@ -84,7 +71,7 @@ namespace PX.Objects.IN
                 }
                 else
                 {
-                    
+
                     if (projectItem.TotalAvailableQty > 0)
                     {
                         projectItem.QtySelected = projectItem.TotalAvailableQty;
@@ -104,8 +91,6 @@ namespace PX.Objects.IN
         public virtual IEnumerable AddProjectItems(PXAdapter adapter)
         {
             IEnumerable result = null;
-
-            // if (this.Base.Document.Current.Hold == true && this.Base.Document.Current.ReqClassID != null)
             {
                 if (ProjectStockItems.AskExt() == WebDialogResult.OK)
                 {
@@ -138,8 +123,6 @@ namespace PX.Objects.IN
 
                 foreach (ProjectStock line in ProjectStockItems.Cache.Cached)
                 {
-
-
                     if (line.Selected == true && line.QtySelected > 0)
                     {
                         INTran newline = PXCache<INTran>.CreateCopy(this.Base.transactions.Insert(new INTran()));
@@ -147,36 +130,11 @@ namespace PX.Objects.IN
                         newline.Qty = line.QtySelected;
                         this.Base.transactions.Update(newline);
                     }
-
-/*
-
-
-                    if (line.Selected == true)
-                    {
-                        INTran newline = new INTran();
-
-                        newline.InventoryID = line.InventoryID;
-                        newline.LocationID = line.LocationID;
-                        newline.CostLayerType = CostLayerType.Project;
-                        newline.ProjectID = line.ProjectID;
-                        newline.TaskID = line.TaskID;
-                        newline.CostCodeID = line.CostCodeID;
-                        newline.Qty = line.QtySelected;
-                        newline.LotSerialNbr = line.LotSerialNbr;
-                        newline = this.Base.transactions.Insert(newline);
-                        newline.LotSerialNbr = line.LotSerialNbr;
-                        this.Base.transactions.Update(newline);
-                        this.Base.transactions.Cache.SetValue<INTran.lotSerialNbr>(newline, line.LotSerialNbr);
-
-                    }*/
                 }
             }
 
             return adapter.Get();
         }
-
-
-
 
         protected INTran InitTran(INTran newTran, ProjectStock siteStatus)
         {
@@ -209,52 +167,6 @@ namespace PX.Objects.IN
             return newTran;
         }
 
-
-
-        /*
-
-                public PXSelect<ProjectStock> stockView;
-
-                #region Add Items
-                // Add Inv Item action button
-                public PXAction<ServiceMaterialRequest> addInvBySite;
-                [PXUIField(DisplayName = "Add Items", MapEnableRights = PXCacheRights.Select, MapViewRights = PXCacheRights.Select)]
-                [PXLookupButton]
-                public virtual IEnumerable AddInvBySite(PXAdapter adapter)
-                {
-                    if (stockView.AskExt() == WebDialogResult.OK)
-                    {
-                      return AddInv(adapter);
-                    }
-                    stockView.Cache.Clear();
-                    return adapter.Get();
-                }
-                #endregion
-
-                public PXAction<ServiceMaterialRequest> addInv;
-                [PXUIField(DisplayName = "Add", MapEnableRights = PXCacheRights.Select, MapViewRights = PXCacheRights.Select, Visible = false)]
-                [PXLookupButton]
-                public virtual IEnumerable AddInv(PXAdapter adapter)
-                {
-                    foreach (ProjectStock line in stockView.Cache.Cached)
-                    {
-                        if (line.Selected == true)
-                        {                  
-                            INTran newline = PXCache<INTran>.
-                                CreateCopy(this.Base.transactions.Insert(new INTran()));
-
-                            newline.InventoryID = line.InventoryID;
-                            newline.LocationID = line.LocationID ;
-                            newline.CostLayerType = CostLayerType.Project ;
-                            newline.SiteID = line.SiteID;
-
-                            this.Base.transactions.Insert(newline);
-                        }
-                    }
-                    this.Base.transactions.Cache.Clear();
-                    return adapter.Get();
-                }*/
-
         public virtual INRegister CreateTransfer(MaterialTransferRequest mTRequest, CopyDialogInfo info)
         {
             INRegister reg = new INRegister();
@@ -264,127 +176,134 @@ namespace PX.Objects.IN
             reg.ExtRefNbr = mTRequest.ReqNbr;
             this.Base.transfer.Insert(reg);
 
+            var hasLines = false;
             var req = PXSelect<MTRequestDetails,
-                       Where<MTRequestDetails.reqNbr,
-                       Equal<Required<MTRequestDetails.reqNbr>>,
-                       And<MTRequestDetails.requestedQty, Greater<decimal0>>>>.Select(this.Base, mTRequest.ReqNbr);
+                                                                      Where<MTRequestDetails.reqNbr,
+                                                                      Equal<Required<MTRequestDetails.reqNbr>>,
+                                                                      And<MTRequestDetails.requestedQty, Greater<decimal0>>>>.Select(this.Base, mTRequest.ReqNbr);
+            string finalErrorMessage = "No line(s) to proceed. Please review the error.\n";
             foreach (var MTRequestetails in req)
             {
-
-
-
                 MTRequestDetails lineRec = (MTRequestDetails)MTRequestetails;
-               
-                if(info.CheckAvailableQty == true)
+                PMTask task = PMTask.PK.Find(this.Base, lineRec.ProjectID, lineRec.TaskID);
+                INSite site = INSite.PK.Find(this.Base, mTRequest.FromSiteID);
+                INLocation location = INLocation.PK.Find(this.Base, info.LocationID);
+                InventoryItem item = InventoryItem.PK.Find(this.Base, lineRec.InventoryID);
+                INLocationStatus inItem = PXSelect<INLocationStatus,
+                                                Where<INLocationStatus.inventoryID, Equal<Required<INLocationStatus.inventoryID>>,
+                                                And<INLocationStatus.siteID, Equal<Required<INLocationStatus.siteID>>,
+                                                And<INLocationStatus.locationID, Equal<Required<INLocationStatus.locationID>>>>>>.Select(this.Base, lineRec.InventoryID, mTRequest.FromSiteID, info.LocationID);
+                bool insertRecord = false;
+                var currentErrorMessage = " ";
+                if (lineRec.RequestedQty > lineRec.TransferQty)
                 {
-
-                    /*ProjectStock projectItem = PXSelectGroupBy<ProjectStock,
-                      Where<ProjectStock.projectID, Equal<Required<ProjectStock.inventoryID>>,
-                      And<ProjectStock.inventoryID, Equal<Required<ProjectStock.taskID>>,
-                      And<ProjectStock.taskID, Equal<Required<ProjectStock.projectID>>,
-                      And<ProjectStock.costCodeID, Equal<Required<ProjectStock.costCodeID>>,
-                      And<ProjectStock.siteID, Equal<Required<ProjectStock.siteID>>>>>>>,
-                      Aggregate<GroupBy<ProjectStock.inventoryID,
-                      GroupBy<ProjectStock.companyID,
-                      GroupBy<ProjectStock.projectID,
-                      GroupBy<ProjectStock.taskID,
-                      GroupBy<ProjectStock.lotSerialNbr,
-                      GroupBy<ProjectStock.siteID,
-                      GroupBy<ProjectStock.locationID, Sum<ProjectStock.totalAvailableQty>>>>>>>>>>.Select(this.Base, lineRec.InventoryID, lineRec.TaskID, lineRec.ProjectID, lineRec.CostCode, mTRequest.FromSiteID);
-                    */
-
-                    INLocationStatus inItem = PXSelect<INLocationStatus,
-                     Where<INLocationStatus.inventoryID, Equal<Required<INLocationStatus.inventoryID>>,
-                     And< INLocationStatus.siteID, Equal<Required<INLocationStatus.siteID>>,
-                     And< INLocationStatus.locationID, Equal<Required< INLocationStatus.locationID>>>>>>.Select(this.Base, lineRec.InventoryID, mTRequest.FromSiteID, info.LocationID);
-
-
-
-                    if (inItem != null )
+                    if (info.CheckAvailableQty == true)
                     {
-
-                        if (inItem.QtyAvail > lineRec.RequestedQty - lineRec.TransferQty && lineRec.RequestedQty > lineRec.TransferQty)
+                        if (inItem != null)
                         {
+                            if (info.ActiveTask == true)
+                            {
+                                if (inItem.QtyAvail >= (lineRec.RequestedQty - lineRec.TransferQty) && task.Status == ProjectTaskStatus.Active)
+                                {
+                                    insertRecord = true;
+                                }
+                                else
+                                {
+                                    if (inItem.QtyAvail < (lineRec.RequestedQty - lineRec.TransferQty) && task.Status != ProjectTaskStatus.Active)
+                                    {
+                                        currentErrorMessage = PXMessages.LocalizeFormat(GSynchExt.Messages.Scenario1,
+                                                                                            item.InventoryCD.Trim(), site.SiteCD.Trim(), location.LocationCD.Trim(), inItem.QtyAvail, task.TaskCD.Trim());
 
-                            INTran tran = new INTran();
-                            INTranGSExt tranExt = PXCache<INTran>.GetExtension<INTranGSExt>(tran);
-                            tran.LocationID = info.LocationID;
-                            tran.CostLayerType = info.CostLayerType;
-                            tran.ToLocationID = info.ToLocationID;
-                            tran.ToCostLayerType = info.ToCostLayerType;
-                            tran.InventoryID = lineRec.InventoryID;
-                            tran.ToProjectID = lineRec.ProjectID;
-                            tran.ToTaskID = lineRec.TaskID;
-                            tran.ToCostCodeID = lineRec.CostCode;
-                            tran.Qty = lineRec.RequestedQty - lineRec.TransferQty;
-                            tran.OrigQty = lineRec.RequestedQty;
+                                    }
+                                    if (inItem.QtyAvail < (lineRec.RequestedQty - lineRec.TransferQty) && task.Status == ProjectTaskStatus.Active)
+                                    {
+                                        currentErrorMessage = PXMessages.LocalizeFormat(GSynchExt.Messages.Scenario2,
+                                                                                             item.InventoryCD.Trim(), site.SiteCD.Trim(), location.LocationCD.Trim(), inItem.QtyAvail);
 
-
-                            tranExt.UsrcreatedByMTR = true;
-                            tranExt.UsrMTRRef = mTRequest.ReqNbr;
-
-                            this.Base.transactions.Insert(tran);
-
+                                    }
+                                    if (inItem.QtyAvail > (lineRec.RequestedQty - lineRec.TransferQty) && task.Status != ProjectTaskStatus.Active)
+                                    {
+                                        currentErrorMessage = PXMessages.LocalizeFormat(GSynchExt.Messages.Scenario3,
+                                                                                            task.TaskCD.Trim());
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                if (inItem.QtyAvail > (lineRec.RequestedQty - lineRec.TransferQty))
+                                {
+                                    insertRecord = true;
+                                }
+                                else
+                                {
+                                    currentErrorMessage = PXMessages.LocalizeFormat(GSynchExt.Messages.Scenario4,
+                                                                                        item.InventoryCD.Trim(), site.SiteCD.Trim(), location.LocationCD.Trim(), inItem.QtyAvail);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            currentErrorMessage = PXMessages.LocalizeFormat(GSynchExt.Messages.Scenario5,
+                                                                                            item.InventoryCD.Trim(), site.SiteCD.Trim(), location.LocationCD.Trim());
                         }
                     }
-
+                    else
+                    { 
+                        if (info.ActiveTask == true)
+                        {
+                            if (task.Status == ProjectTaskStatus.Active)
+                            {
+                                insertRecord = true;
+                            }
+                            else
+                            {
+                                currentErrorMessage = PXMessages.LocalizeFormat(GSynchExt.Messages.Scenario6,
+                                                                                             task.TaskCD.Trim());
+                            }
+                        }
+                        else
+                        {
+                            insertRecord = true;
+                        }
+                    }
                 }
                 else
                 {
-                    if (lineRec.RequestedQty > lineRec.TransferQty) //new lines created for items that are not fully transferred
-                    {
-                        INTran tran = new INTran();
-                        INTranGSExt tranExt = PXCache<INTran>.GetExtension<INTranGSExt>(tran);
-                        tran.LocationID = info.LocationID;
-                        tran.CostLayerType = info.CostLayerType;
-                        tran.ToLocationID = info.ToLocationID;
-                        tran.ToCostLayerType = info.ToCostLayerType;
-                        tran.InventoryID = lineRec.InventoryID;
-                        tran.ToProjectID = lineRec.ProjectID;
-                        tran.ToTaskID = lineRec.TaskID;
-                        tran.ToCostCodeID = lineRec.CostCode;
-                        tran.Qty = lineRec.RequestedQty - lineRec.TransferQty;
-                        tran.OrigQty = lineRec.RequestedQty;
-
-
-                        tranExt.UsrcreatedByMTR = true;
-                        tranExt.UsrMTRRef = mTRequest.ReqNbr;
-
-                        this.Base.transactions.Insert(tran);
-                    }
+                    currentErrorMessage = PXMessages.LocalizeFormat(GSynchExt.Messages.Scenario7, mTRequest.ReqNbr.Trim());
                 }
-
-
-
-
-
-                /*
-
-                if (lineRec.RequestedQty > lineRec.TransferQty) //new lines created for items that are not fully transferred
+                if (insertRecord)
                 {
-                    INTran tran = new INTran();
+                    var tran = this.Base.transactions.Insert(new INTran
+                    {
+                        LocationID = info.LocationID,
+                        CostLayerType = info.CostLayerType,
+                        ToLocationID = info.ToLocationID,
+                        ToCostLayerType = info.ToCostLayerType,
+                        InventoryID = lineRec.InventoryID,
+                        ToProjectID = lineRec.ProjectID,
+                        ToTaskID = lineRec.TaskID,
+                        ToCostCodeID = lineRec.CostCode,
+                        Qty = lineRec.RequestedQty - lineRec.TransferQty,
+                        OrigQty = lineRec.RequestedQty
+                    });
                     INTranGSExt tranExt = PXCache<INTran>.GetExtension<INTranGSExt>(tran);
-                    tran.LocationID = info.LocationID;
-                    tran.CostLayerType = info.CostLayerType;
-                    tran.ToLocationID = info.ToLocationID;
-                    tran.ToCostLayerType = info.ToCostLayerType;
-                    tran.InventoryID = lineRec.InventoryID;
-                    tran.ToProjectID = lineRec.ProjectID;
-                    tran.ToTaskID = lineRec.TaskID;
-                    tran.ToCostCodeID = lineRec.CostCode;
-                    tran.Qty = lineRec.RequestedQty - lineRec.TransferQty;
-                    tran.OrigQty = lineRec.RequestedQty;
-
-
                     tranExt.UsrcreatedByMTR = true;
                     tranExt.UsrMTRRef = mTRequest.ReqNbr;
 
-                    this.Base.transactions.Insert(tran);
+                    hasLines = true;
                 }
-
-                */
+                else
+                {
+                    if (!finalErrorMessage.Contains(currentErrorMessage))
+                    {
+                        finalErrorMessage += currentErrorMessage;
+                    }
+                }
             }
-
+            if (!hasLines)
+            {
+                throw new PXException(finalErrorMessage);
+            }
             return reg;
         }
         public virtual INTran CreateTransferFromMTR(MaterialTransferRequest mTRequest, CopyDialogInfo info, bool redirect = false)
@@ -431,13 +350,10 @@ namespace PX.Objects.IN
                 tran.InventoryID = lineRec.InventoryID;
                 tran.Qty = lineRec.RequestedQty;
                 tran.OrigQty = lineRec.RequestedQty;
-
-
                 tranExt.UsrCreatedBySMR = true;
                 tranExt.UsrSMRRef = mTRequest.ReqNbr;
 
                 this.Base.transactions.Insert(tran);
-                // this.Base.transactions.Update(tran);
             }
             if (mTRequest == null) return reg;
 
@@ -448,9 +364,6 @@ namespace PX.Objects.IN
         {
 
             CreateSMTransfer(mTRequest, info);
-
-            //    var transferRequestEntry = PXGraph.CreateInstance<MaterialTransferRequestEntry>();
-
             if (this.Base.transfer.Cache.IsDirty)
             {
                 if (redirect)
@@ -466,6 +379,25 @@ namespace PX.Objects.IN
             }
             throw new PXException();
         }
+        protected virtual void CalcLineEstCostTotals(out decimal UsrISGAEstTotalCost)
+        {
+            UsrISGAEstTotalCost = 0m;
+
+            var detailsRows = this.Base.transactions.Select();
+            if (detailsRows == null) return;
+
+            foreach (INTran tran in detailsRows)
+            {
+                INItemCost itemCostRec = INItemCost.PK.Find(this.Base, tran?.InventoryID, this.Base.Accessinfo.BaseCuryID);
+                if (itemCostRec != null)
+                {
+                    decimal RoundedAvgCost = Math.Round((decimal)itemCostRec.AvgCost, 4);
+                    decimal RoundedQty = Math.Round((decimal)tran.Qty, 4);
+                    UsrISGAEstTotalCost += (decimal)(RoundedAvgCost * RoundedQty);
+
+                }
+            }
+        }
 
         #region Event Handlers
 
@@ -474,12 +406,16 @@ namespace PX.Objects.IN
             INRegister row = e.Row;
             if (row == null) return;
 
+            INRegisterGSExt rowExt = row.GetExtension<INRegisterGSExt>();
+            decimal UsrISGAEstTotalCost = 0m;
+            CalcLineEstCostTotals(out UsrISGAEstTotalCost);
+            rowExt.UsrISGAEstTotalCost = UsrISGAEstTotalCost;
+
             bool isReleased = row.Status == INDocStatus.Released;
             addProjectItems.SetEnabled(!isReleased);
+
             bool notFromMTR = row.CreatedByScreenID != "GS301027";
             PXUIFieldAttribute.SetEnabled<INRegister.extRefNbr>(e.Cache, row, notFromMTR);
-
-
         }
         protected virtual void _(Events.RowPersisted<INRegister> e)
         {
@@ -504,12 +440,10 @@ namespace PX.Objects.IN
                     foreach (MTRequestDetails requestlines in details)
                     {
                         var budget = PMCostBudget.PK.Find(ProjEntry, requestlines.ProjectID, requestlines.TaskID, requestlines.AccountGroupID,
-                                           requestlines.CostCode, requestlines.InventoryID);
+                                                                requestlines.CostCode, requestlines.InventoryID);
 
                         decimal? totTranQty = Decimal.Zero;
                         decimal? totIssueQty = Decimal.Zero;
-
-                        //GetTranIssueQtyPerRequest(this, this.MatlRequest.Current, out totTranQty, out totIssueQty);
                         MTRGraph.GetTranIssueQtyPerRequest(MTRGraph, requestlines, out totTranQty, out totIssueQty);
 
                         requestlines.TransferQty = totTranQty;
@@ -528,90 +462,8 @@ namespace PX.Objects.IN
                 throw new PXException(ex.Message);
             }
         }
-
-        /*protected virtual void _(Events.RowDeleting<INRegister> e)
-        {
-            INRegister row = e.Row;
-            if (row == null) return;
-            //03212024 - Recalculate Qty Improvements Start
-            MaterialTransferRequest mtr = MaterialTransferRequest.UK.Find(this.Base, row.ExtRefNbr);
-            bool FromMTR = (row.CreatedByScreenID == "GS301027" || mtr != null);
-            try
-            {
-                if ((e.TranStatus == PXTranStatus.Completed || e.TranStatus == PXTranStatus.Open) && FromMTR)
-                {
-                    /// Recalculate transfer quantities for the request everytime the transfer header is saved/Deleted.
-                    var MTRGraph = PXGraph.CreateInstance<MaterialTransferRequestEntry>();
-                    MTRGraph.MatlRequest.Current = mtr;
-                    MTRGraph.ReCalTranIssueQuantities(MTRGraph, mtr, INDocType.Transfer);
-                     MTRGraph.Save.Press();
-
-
-            }
-            //03212024 - Recalculate Qty Improvements End
-            catch (Exception ex)
-            {
-                throw new PXException(ex.Message);
-            }
-        }*/
-
-        protected virtual void _(Events.RowSelected<INTran> e)
-        {
-            INTran row = e.Row;
-            if (row == null) return;
-
-            INTranGSExt rowExt = PXCache<INTran>.GetExtension<INTranGSExt>(row);
-            if (rowExt.UsrMTRRef != null || rowExt.UsrcreatedByMTR == true)
-            {
-                var MTRGraph = PXGraph.CreateInstance<MaterialTransferRequestEntry>();
-
-                MTRequestDetails transferDetail =
-                    PXSelect<MTRequestDetails,
-                    Where<MTRequestDetails.reqNbr,
-                    Equal<Required<MTRequestDetails.reqNbr>>,
-                    And<MTRequestDetails.inventoryID,
-                    Equal<Required<MTRequestDetails.inventoryID>>>>>.Select(MTRGraph, rowExt.UsrMTRRef, row.InventoryID);
-
-                if (transferDetail == null) return;
-                MaterialTransferRequest request = MaterialTransferRequest.UK.Find(MTRGraph, transferDetail.ReqNbr);
-                INRegister header = INRegister.PK.Find(this.Base, INDocType.Transfer, row.RefNbr);
-                if (header == null) return;
-                if (request.ToSiteID == row.ToSiteID && header.Status == INDocStatus.Released)
-                {
-                    MTRGraph.MatlRequestDet.Current = transferDetail;
-                    MTRGraph.MatlRequestDet.Current.TransferQty = row.Qty;
-                    MTRGraph.MatlRequestDet.Update(MTRGraph.MatlRequestDet.Current);
-                    MTRGraph.Actions.PressSave();
-                }
-            }
-            if (rowExt.UsrSMRRef != null || rowExt.UsrCreatedBySMR == true)
-            {
-                var SMRGraph = PXGraph.CreateInstance<ServiceMaterialRequestEntry>();
-
-                ServiceMaterialRequestDetails transferDetail =
-                    PXSelect<ServiceMaterialRequestDetails,
-                    Where<ServiceMaterialRequestDetails.reqNbr,
-                    Equal<Required<ServiceMaterialRequestDetails.reqNbr>>,
-                    And<ServiceMaterialRequestDetails.inventoryID,
-                    Equal<Required<ServiceMaterialRequestDetails.inventoryID>>>>>.Select(SMRGraph, rowExt.UsrSMRRef, row.InventoryID);
-
-                if (transferDetail == null) return;
-                ServiceMaterialRequest request = ServiceMaterialRequest.UK.Find(SMRGraph, transferDetail.ReqNbr);
-                INRegister header = INRegister.PK.Find(this.Base, INDocType.Transfer, row.RefNbr);
-                if (header == null) return;
-                if (request.ToSiteID == row.ToSiteID && header.Status == INDocStatus.Released)
-                {
-                    SMRGraph.MatlRequestDet.Current = transferDetail;
-                    SMRGraph.MatlRequestDet.Current.TransferQty = row.Qty;
-                    SMRGraph.MatlRequestDet.Update(SMRGraph.MatlRequestDet.Current);
-                    SMRGraph.Actions.PressSave();
-                }
-            }
-
-        }
         #endregion
-
-
+       
         public class CurrentCompany : PX.Data.BQL.BqlInt.Constant<CurrentCompany> { public CurrentCompany() : base(PX.Data.Update.PXInstanceHelper.CurrentCompany) { } }
         public class ProjectType : PX.Data.BQL.BqlString.Constant<ProjectType> { public ProjectType() : base("P") { } }
 

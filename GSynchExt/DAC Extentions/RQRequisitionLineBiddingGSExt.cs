@@ -15,13 +15,17 @@ namespace PX.Objects.RQ
 {
   [PXProjection(typeof(Select<RQRequisitionLine>), Persistent = false)]
   [Serializable]
-  public class RQRequisitionLineBiddingGSExt : PXCacheExtension<PX.Objects.RQ.RQRequisitionLineBidding>
+  public sealed class RQRequisitionLineBiddingGSExt : PXCacheExtension<PX.Objects.RQ.RQRequisitionLineBidding>
   {
-    #region NoteID
-    public abstract class noteID : PX.Data.BQL.BqlGuid.Field<noteID> { }
+        #region IsActive
+        public static bool IsActive() { return PXAccess.FeatureInstalled<FeaturesSet.inventory>(); }
+        #endregion
+
+        #region NoteID
+        public abstract class noteID : PX.Data.BQL.BqlGuid.Field<noteID> { }
     protected Guid? _NoteID;
     [PXNote(BqlTable = typeof(RQRequisitionLine), BqlField = typeof(RQRequisitionLine.noteID))]
-    public virtual Guid? NoteID
+    public Guid? NoteID
     {
       get
       {
