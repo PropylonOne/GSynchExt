@@ -45,8 +45,6 @@ namespace GSynchExt
         public abstract class comTaskID2 : PX.Data.BQL.BqlInt.Field<comTaskID2> { }
         #endregion
 
-
-
         #region NotComTaskCD1
         [PXDBString(30, IsUnicode = true, InputMask = "")]
         [PXSelector(typeof(Search<PMTask.taskCD>))]
