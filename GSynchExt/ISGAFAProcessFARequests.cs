@@ -25,6 +25,7 @@ namespace PX.Objects.FA
     [Serializable]
     [PXCacheName(GSynchExt.Messages.FARequestFilter)]
     public partial class ISGAFARequestFilter : PXBqlTable, IBqlTable
+
     {
         public class PK : PrimaryKeyOf<ISGAFARequestFilter>.By<reqNbr>
         {
